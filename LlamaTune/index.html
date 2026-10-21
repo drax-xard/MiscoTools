@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Estimate the best llama.cpp llama-server flags for your GPU, RAM, and GGUF model.">
+  <meta name="color-scheme" content="dark">
+  <title>llamatune — llama.cpp launch optimizer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="llamatune home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M8 20.5V10l4-3 4 3v10.5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M16 20.5V10l4-3 4 3v10.5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8 20.5h16M10 24h3.5M18.5 24H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="20" cy="13.5" r="1" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">llamatune</span>
+        <span class="brand-sub">llama.cpp launch optimizer</span>
+      </span>
+    </a>
+    <div class="topbar-meta">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span>local estimator</span>
+      <span class="meta-separator" aria-hidden="true"></span>
+      <span>no telemetry</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow"><span>01</span> Hardware-aware launch planning</p>
+        <h1>Fit the model.<br><em>Fill the context.</em></h1>
+      </div>
+      <p class="hero-copy">Turn your rig and GGUF specs into an optimized <code>llama-server</code> command. The estimator budgets weights, KV cache, and runtime overhead before choosing context size and GPU offload.</p>
+    </section>
+
+    <div class="workspace">
+      <aside class="config-column" aria-label="Configuration">
+        <form id="config-form" novalidate>
+          <section class="panel">
+            <div class="panel-heading">
+              <span class="step-number">01</span>
+              <div>
+                <h2>Your hardware</h2>
+                <p>Memory limits decide the whole plan.</p>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field field-wide">
+                <label for="gpu-model">GPU</label>
+                <input id="gpu-model" name="gpu-model" type="text" value="NVIDIA RTX 4090" autocomplete="off" spellcheck="false">
+              </div>
+
+              <div class="field">
+                <label for="vram">GPU VRAM <span class="label-hint">GiB</span></label>
+                <div class="input-with-suffix">
+                  <input id="vram" name="vram" type="number" min="0" max="512" step="0.5" value="24" inputmode="decimal">
+                  <span>GiB</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="ram">System RAM <span class="label-hint">GiB</span></label>
+                <div class="input-with-suffix">
+                  <input id="ram" name="ram" type="number" min="0" max="4096" step="1" value="32" inputmode="numeric">
+                  <span>GiB</span>
+                </div>
+              </div>
+
+              <div class="field field-wide">
+                <label for="cpu-model">CPU</label>
+                <input id="cpu-model" name="cpu-model" type="text" value="AMD Ryzen 7 7800X3D" autocomplete="off" spellcheck="false">
+              </div>
+
+              <div class="field">
+                <label for="cpu-threads">CPU threads</label>
+                <input id="cpu-threads" name="cpu-threads" type="number" min="1" max="256" step="1" value="8" inputmode="numeric">
+                <p class="field-note">Physical cores are usually fastest.</p>
+              </div>
+
+              <div class="field">
+                <label>Unified memory</label>
+                <label class="switch-row" for="unified-memory">
+                  <input id="unified-memory" name="unified-memory" type="checkbox">
+                  <span class="switch" aria-hidden="true"></span>
+                  <span>Apple Silicon / APU</span>
+                </label>
+                <p class="field-note">Shares RAM with the GPU.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <span class="step-number">02</span>
+              <div>
+                <h2>Your model</h2>
+                <p>Use the GGUF's real parameter count.</p>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field field-wide">
+                <label for="model-name">Model</label>
+                <input id="model-name" name="model-name" type="text" value="Llama 3.1 8B Instruct" autocomplete="off" spellcheck="false">
+              </div>
+
+              <div class="field">
+                <label for="params">Parameters <span class="label-hint">billions</span></label>
+                <div class="input-with-suffix">
+                  <input id="params" name="params" type="number" min="0.1" max="5000" step="0.1" value="8" inputmode="decimal">
+                  <span>B</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="quant">Quantization</label>
+                <select id="quant" name="quant">
+                  <optgroup label="1–2 bit">
+                    <option value="IQ1_S">IQ1_S · 1.56 bpw</option>
+                    <option value="IQ1_M">IQ1_M · 1.75 bpw</option>
+                    <option value="IQ2_XXS">IQ2_XXS · 2.06 bpw</option>
+                    <option value="IQ2_XS">IQ2_XS · 2.31 bpw</option>
+                    <option value="Q2_K">Q2_K · 2.63 bpw</option>
+                  </optgroup>
+                  <optgroup label="3-bit">
+                    <option value="IQ3_XXS">IQ3_XXS · 3.06 bpw</option>
+                    <option value="IQ3_XS">IQ3_XS · 3.33 bpw</option>
+                    <option value="Q3_K_S">Q3_K_S · 3.44 bpw</option>
+                    <option value="Q3_K_M">Q3_K_M · 3.91 bpw</option>
+                    <option value="Q3_K_L">Q3_K_L · 4.27 bpw</option>
+                  </optgroup>
+                  <optgroup label="4-bit">
+                    <option value="Q4_0">Q4_0 · 4.55 bpw</option>
+                    <option value="Q4_K_S">Q4_K_S · 4.58 bpw</option>
+                    <option value="Q4_K_M" selected>Q4_K_M · 4.85 bpw</option>
+                    <option value="Q4_1">Q4_1 · 5.00 bpw</option>
+                  </optgroup>
+                  <optgroup label="5-bit">
+                    <option value="Q5_K_S">Q5_K_S · 5.52 bpw</option>
+                    <option value="Q5_0">Q5_0 · 5.54 bpw</option>
+                    <option value="Q5_K_M">Q5_K_M · 5.68 bpw</option>
+                    <option value="Q5_1">Q5_1 · 6.00 bpw</option>
+                  </optgroup>
+                  <optgroup label="6–16 bit">
+                    <option value="Q6_K">Q6_K · 6.59 bpw</option>
+                    <option value="Q8_0">Q8_0 · 8.50 bpw</option>
+                    <option value="F16">F16 · 16.0 bpw</option>
+                    <option value="BF16">BF16 · 16.0 bpw</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="native-context">Max native context <span class="label-hint">tokens</span></label>
+                <input id="native-context" name="native-context" type="number" min="512" max="10485760" step="256" value="131072" inputmode="numeric">
+              </div>
+
+              <div class="field">
+                <label for="kv-cache">KV cache precision</label>
+                <select id="kv-cache" name="kv-cache">
+                  <option value="q8_0" selected>Q8_0 · recommended</option>
+                  <option value="f16">F16 · max quality</option>
+                  <option value="q4_0">Q4_0 · max context</option>
+                </select>
+                <p class="field-note">Q8_0 is near-lossless versus F16.</p>
+              </div>
+            </div>
+
+            <details class="advanced" id="advanced">
+              <summary>
+                <span>Architecture estimate</span>
+                <span class="advanced-value" id="arch-summary">Llama 3.x · 32 layers</span>
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </summary>
+              <div class="advanced-body">
+                <div class="field-grid">
+                  <div class="field field-wide">
+                    <label for="arch-profile">Architecture preset</label>
+                    <select id="arch-profile" name="arch-profile">
+                      <option value="auto" selected>Auto-detect from model name</option>
+                      <option value="llama3">Llama 3.x</option>
+                      <option value="qwen2">Qwen 2 / 2.5</option>
+                      <option value="qwen3">Qwen 3</option>
+                      <option value="mistral">Mistral / Mixtral</option>
+                      <option value="gemma2">Gemma 2</option>
+                      <option value="gemma3">Gemma 3 (approx.)</option>
+                      <option value="phi">Phi-3 / Phi-4</option>
+                      <option value="deepseek">DeepSeek V2 / V3 / R1 (MLA)</option>
+                      <option value="command">Command R</option>
+                      <option value="yi">Yi</option>
+                      <option value="generic">Generic GQA</option>
+                      <option value="custom">Custom geometry</option>
+                    </select>
+                  </div>
+                  <div class="field field-wide custom-field" id="custom-layers-field" hidden>
+                    <label for="custom-layers">Transformer layers</label>
+                    <input id="custom-layers" type="number" min="1" max="512" step="1" value="32" inputmode="numeric">
+                  </div>
+                  <div class="field custom-field" id="custom-kv-heads-field" hidden>
+                    <label for="custom-kv-heads">KV heads</label>
+                    <input id="custom-kv-heads" type="number" min="1" max="512" step="1" value="8" inputmode="numeric">
+                  </div>
+                  <div class="field custom-field" id="custom-head-dim-field" hidden>
+                    <label for="custom-head-dim">Head dim</label>
+                    <input id="custom-head-dim" type="number" min="8" max="1024" step="8" value="128" inputmode="numeric">
+                  </div>
+                </div>
+                <p class="advanced-note" id="arch-note">Auto-detected KV geometry is used to estimate cache size. Override it if your GGUF differs.</p>
+              </div>
+            </details>
+          </section>
+
+          <section class="panel strategy-panel">
+            <div class="panel-heading">
+              <span class="step-number">03</span>
+              <div>
+                <h2>Optimization target</h2>
+                <p>Trade speed against context length.</p>
+              </div>
+            </div>
+
+            <div class="segmented" role="group" aria-label="Optimization target">
+              <button type="button" class="segment" data-strategy="speed">
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 11.5a6 6 0 1 1 11 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="m8 8 3-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Speed
+              </button>
+              <button type="button" class="segment is-active" data-strategy="balanced" aria-pressed="true">
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Balanced
+              </button>
+              <button type="button" class="segment" data-strategy="context">
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h8M2.5 11.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Context
+              </button>
+            </div>
+
+            <p id="strategy-copy" class="strategy-copy">Keeps all layers on the GPU whenever possible, then grows context to fill the remaining VRAM.</p>
+          </section>
+        </form>
+      </aside>
+
+      <section class="results-column" aria-label="Optimized launch plan" aria-live="polite">
+        <div class="results-topline">
+          <div>
+            <p class="eyebrow compact"><span>OUT</span> Optimized launch plan</p>
+            <h2 id="plan-title">Balanced fit</h2>
+          </div>
+          <span class="fit-badge" id="fit-badge">Full GPU offload</span>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric metric-primary">
+            <div class="metric-label">Usable context</div>
+            <div class="metric-value"><span id="metric-context">131,072</span><span class="metric-unit">tok</span></div>
+            <div class="metric-foot" id="metric-context-foot">Native maximum</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">GPU layers</div>
+            <div class="metric-value"><span id="metric-layers">32</span><span class="metric-unit" id="metric-layers-total">/ 32</span></div>
+            <div class="metric-foot" id="metric-layers-foot">Full acceleration</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">KV cache</div>
+            <div class="metric-value metric-value-small" id="metric-kv">Q8_0</div>
+            <div class="metric-foot" id="metric-kv-foot">8.5 GiB on GPU</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">Speed class</div>
+            <div class="metric-value metric-value-small" id="metric-speed">GPU-bound</div>
+            <div class="metric-foot" id="metric-speed-foot">No CPU fallback</div>
+          </article>
+        </div>
+
+        <section class="command-card">
+          <div class="command-head">
+            <div>
+              <h2>Launch command</h2>
+              <p id="command-summary">llama-server · 32/32 layers · 131,072 ctx</p>
+            </div>
+            <button class="copy-button" id="copy-button" type="button">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.4" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" stroke="currentColor" stroke-width="1.3"/></svg>
+              <span>Copy</span>
+            </button>
+          </div>
+          <div class="code-wrap">
+            <pre><code id="command-output"></code></pre>
+          </div>
+          <div class="command-foot">
+            <span class="command-hint">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.2"/><path d="M8 7v4M8 5.2v.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Replace <code>/models/…</code> with your GGUF path.
+            </span>
+            <button class="text-button" id="show-warnings" type="button">0 warnings</button>
+          </div>
+        </section>
+
+        <section class="panel memory-panel">
+          <div class="panel-heading compact-heading">
+            <span class="step-number">MEM</span>
+            <div>
+              <h2>Memory envelope</h2>
+              <p id="memory-caption">Estimated allocation at launch</p>
+            </div>
+          </div>
+
+          <div class="memory-block">
+            <div class="memory-topline">
+              <span><span class="memory-name">VRAM</span> <strong id="vram-used">—</strong></span>
+              <span id="vram-free">— free</span>
+            </div>
+            <div class="memory-bar" id="vram-bar" role="img" aria-label="VRAM allocation">
+              <span class="mem-segment seg-weights" data-seg="weights"></span>
+              <span class="mem-segment seg-kv" data-seg="kv"></span>
+              <span class="mem-segment seg-runtime" data-seg="runtime"></span>
+              <span class="mem-segment seg-reserve" data-seg="reserve"></span>
+            </div>
+            <div class="memory-legend" id="vram-legend"></div>
+          </div>
+
+          <div class="memory-block">
+            <div class="memory-topline">
+              <span><span class="memory-name">System RAM</span> <strong id="ram-used">—</strong></span>
+              <span id="ram-free">— free</span>
+            </div>
+            <div class="memory-bar" id="ram-bar" role="img" aria-label="System RAM allocation">
+              <span class="mem-segment seg-weights" data-seg="weights"></span>
+              <span class="mem-segment seg-kv" data-seg="kv"></span>
+              <span class="mem-segment seg-reserve" data-seg="reserve"></span>
+            </div>
+            <div class="memory-legend" id="ram-legend"></div>
+          </div>
+
+          <div class="assumption-line">
+            <span>Estimate</span>
+            <span id="assumption-text">Assumes ~1% GGUF overhead and reserves headroom for the display, CUDA/Metal context, and compute buffers.</span>
+          </div>
+        </section>
+
+        <section class="panel insight-panel">
+          <div class="panel-heading compact-heading">
+            <span class="step-number">LOG</span>
+            <div>
+              <h2>Why this config</h2>
+              <p>What the optimizer decided, and why.</p>
+            </div>
+          </div>
+          <ul class="insight-list" id="insight-list"></ul>
+          <div class="warning-box" id="warning-box" hidden>
+            <div class="warning-title">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5 14 13H2L8 2.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M8 6v3.2M8 11.2v.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              <span>Heads-up</span>
+            </div>
+            <ul id="warning-list"></ul>
+          </div>
+        </section>
+
+        <p class="disclaimer">Memory figures are estimates, not benchmarks. Actual usage varies with llama.cpp build, backend, attention implementation, graph allocation, and the exact GGUF. Leave headroom, start with the suggested command, and reduce <code>--ctx-size</code> first if you hit an out-of-memory error.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <span>llamatune</span>
+    <span>Built for llama.cpp · Estimates only</span>
+    <span class="footer-mono">ctx ↑ speed ↑</span>
+  </footer>
+
+  <script src="optimizer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
