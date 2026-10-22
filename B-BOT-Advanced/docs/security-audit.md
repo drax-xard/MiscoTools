@@ -45,9 +45,9 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 
 | ID | Severity | Finding |
 | --- | --- | --- |
-| SEC-01 | High | `.env.example` ships a valid-looking default household token |
+| SEC-01 | High | **RESOLVED** — `.env.example` no longer ships placeholder; config rejects placeholders/weak tokens; token generator added |
 | SEC-02 | Medium | No rate limiting or connection limits; token brute force and inference-cost abuse |
-| SEC-03 | Medium | Enabling CORS crashes startup; intended policy is also wildcard |
+| SEC-03 | Medium | **RESOLVED** — CORS middleware added before startup; startup no longer crashes |
 | SEC-04 | Medium | Full conversation history resent on every turn with no cap |
 | SEC-05 | Medium | No global request-body or SSE response limits |
 | SEC-06 | Medium | Bearer token persisted in `localStorage`; no CSP/security headers |
@@ -55,8 +55,8 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 | SEC-08 | Medium | Dependencies use open-ended ranges; no lockfile or vulnerability audit |
 | SEC-09 | Medium | SQLite data and backups have no explicit confidentiality/retention controls |
 | SEC-10 | Low | Upstream LLM error bodies are relayed to clients |
-| SEC-11 | Low | Health endpoint discloses filesystem path and feature state |
-| SEC-12 | Low | Non-ASCII authorization header causes an unhandled 500 |
+| SEC-11 | Low | **RESOLVED** — Health endpoint no longer discloses filesystem paths/feature details |
+| SEC-12 | Low | **RESOLVED** — Non-ASCII authorization header handled safely (401, no 500) |
 | SEC-13 | Low | FTS `MATCH` accepts raw text without escaping |
 | SEC-14 | Low | Security-relevant actions are not written to `audit_log` |
 | SEC-15 | Low | Single token provides no client identity, rotation, or revocation |
@@ -84,23 +84,13 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 
 ## Detailed findings — current code
 
-### SEC-01 — Default token in `.env.example` is accepted (High)
+### SEC-01 — Default token in `.env.example` is accepted (High) — **RESOLVED**
 
-**Evidence:** `backend/.env.example:5` sets
-`B_BOT_AUTH_TOKEN=change-this-to-a-secret-token`.
-
-The application only rejects an **empty** token (`app/deps.py:32-36`). Copying the example
-file without editing it produces a running service protected by a publicly known token.
-Because the plan explicitly uses a single household-wide token, this is the only access
-control in front of chat history, settings, and (later) chores, documents, and devices.
-
-**Impact:** Complete unauthorized access to the API for anyone who can reach the port.
-
-**Recommendation:**
-- Leave the example value empty and add a comment telling users to generate one.
-- Reject known placeholder values and require a minimum length/entropy at startup.
-- Add an install script or `python -m app.tools.gen_token` helper.
-- Fail closed (already done) is not enough when a placeholder counts as configured.
+**Fixes applied:**
+- `backend/.env.example` now leaves `B_BOT_AUTH_TOKEN` empty with generation instructions.
+- `app/core/config.py` validates token at startup: rejects known placeholders and tokens shorter than 16 chars.
+- Added `app/tools/gen_token.py` helper to generate strong tokens.
+- `app/deps.py` still fails closed if token missing.
 
 ### SEC-02 — No rate limiting, connection limits, or lockout (Medium)
 
@@ -119,22 +109,11 @@ requests. There is no middleware or proxy guidance for throttling.
 - Cap concurrent streams per client and globally.
 - Log throttling events.
 
-### SEC-03 — CORS startup failure and wildcard policy (Medium)
+### SEC-03 — CORS startup failure and wildcard policy (Medium) — **RESOLVED**
 
-**Evidence:** `app/main.py:34-41` calls `app.add_middleware()` inside the lifespan. This
-raises `RuntimeError: Cannot add middleware after an application has started` when
-`allow_cors: true`; reproduced with `TestClient`. When it does work in a future refactor, the
-policy is `allow_origins=["*"]`, `allow_methods=["*"]`, `allow_headers=["*"]`.
-
-**Impact:** A configuration change intended to enable browser access instead makes the
-service fail to start (availability). A wildcard policy paired with a token in
-`localStorage` broadens the impact of any XSS or token leak.
-
-**Recommendation:**
-- Add the middleware during app construction, before startup, based on the loaded config.
-- Replace `*` with an explicit origin allowlist from configuration.
-- Keep `allow_credentials=False` (already correct for bearer tokens).
-- Add a startup test for every supported CORS mode.
+**Fixes applied:**
+- CORS middleware is now added during app construction (before startup) based on config.
+- Wildcard policy remains as noted; explicit origin allowlist still recommended for production.
 
 ### SEC-04 — Unbounded conversation history resent each turn (Medium)
 
@@ -242,28 +221,15 @@ It can also confuse clients with misleading upstream messages.
 **Recommendation:** Log detailed errors server-side with a correlation ID; return a generic
 message plus that ID to the client.
 
-### SEC-11 — Health endpoint information disclosure (Low)
+### SEC-11 — Health endpoint information disclosure (Low) — **RESOLVED**
 
-**Evidence:** `app/main.py:49-60` returns the database path, version, model-configured flag,
-and FTS state without authentication.
+**Fixes applied:**
+- `/health` now returns only `{"status": "ok"}` publicly.
 
-**Impact:** Reveals installation paths and feature state. Useful for reconnaissance.
+### SEC-12 — Non-ASCII authorization header causes 500 (Low) — **RESOLVED**
 
-**Recommendation:** Return only `{"status": "ok"}` publicly; expose detailed health on a
-separate authenticated or loopback-only endpoint.
-
-### SEC-12 — Non-ASCII authorization header causes 500 (Low)
-
-**Evidence:** `app/deps.py:45` calls `hmac.compare_digest(token, config.auth_token)`.
-Starlette decodes raw header bytes as Latin-1; `compare_digest` rejects non-ASCII `str` with
-`TypeError`. Confirmed: a raw `Authorization: Bearer t\xf6k` request returns 500.
-
-**Impact:** No authentication bypass, but crafted requests generate unhandled errors and log
-noise; a monitoring system could interpret them as server faults.
-
-**Recommendation:** Encode both values to bytes with a fixed encoding before comparison
-(`hmac.compare_digest(token.encode("utf-8"), expected.encode("utf-8"))`), or explicitly
-reject non-ASCII headers with 401.
+**Fixes applied:**
+- `hmac.compare_digest` now compares UTF-8 encoded bytes with proper error handling; non-ASCII/malformed headers return 401.
 
 ### SEC-13 — FTS `MATCH` input not escaped (Low)
 
