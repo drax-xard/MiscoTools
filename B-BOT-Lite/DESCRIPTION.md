@@ -1,9 +1,9 @@
-# B-BOT
+# B-BOT Lite
 
 A lightweight, standalone everyday AI assistant that talks to any OpenAI-compatible chat
 endpoint. No build step, no dependencies, no backend, and no telemetry.
 
-B-BOT is meant for small local models and simple daily work: planning a day, turning notes
+B-BOT Lite is meant for small local models and simple daily work: planning a day, turning notes
 into to-dos, drafting a message, summarizing text, explaining something plainly, or
 brainstorming a few options.
 
@@ -24,7 +24,7 @@ brainstorming a few options.
 1. Serve the app over HTTP (recommended, so browser security rules behave predictably):
 
    ```sh
-   cd B-BOT
+   cd B-BOT-Lite
    python3 -m http.server 8000
    ```
 
@@ -36,7 +36,7 @@ brainstorming a few options.
    python3 -m http.server 8000
    ```
 
-   Then open <http://localhost:8000/B-BOT/>.
+   Then open <http://localhost:8000/B-BOT-Lite/>.
 
 2. Open **Settings** on mobile, or use the sidebar on desktop.
 3. Enter the **API base URL** and a **Model**. Add an **API key** only if the endpoint needs one.
@@ -73,7 +73,7 @@ OLLAMA_ORIGINS=* ollama serve
 
 ## Privacy and storage
 
-B-BOT has no server component. Requests go directly from the page to the endpoint you
+B-BOT Lite has no server component. Requests go directly from the page to the endpoint you
 configure. The API key, settings, and conversation history are stored in this browser's
 `localStorage`; the key is not encrypted, so avoid using it on a shared browser profile.
 The exported transcript includes the endpoint and model name, but never the API key.

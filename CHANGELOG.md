@@ -9,6 +9,14 @@ Versions are project-wide: a release covers every tool in the collection.
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the static B-BOT assistant to **B-BOT Lite** and added the **B-BOT Advanced**
+  development plan.
+- Updated the B-BOT Advanced plan with the confirmed Pi 5 target, USB audio, bilingual
+  English/Argentinian Spanish voice, remote Whisper `base`, plugin notifications, chore
+  scoring, and smart LED/GPIO integration.
+
 ## [0.2.1] - 2026-10-22
 
 ### Added
@@ -34,7 +42,7 @@ Versions are project-wide: a release covers every tool in the collection.
   - Endpoint, model, API key, temperature, token limit, and system-prompt settings.
   - Model discovery, streamed replies, stop, retry, copy, new chat, and Markdown export.
   - Safe built-in Markdown rendering, responsive layout, and browser-local chat persistence.
-- `B-BOT/DESCRIPTION.md` — setup, compatible endpoints, CORS notes, privacy, and limitations.
+- `B-BOT-Lite/DESCRIPTION.md` — setup, compatible endpoints, CORS notes, privacy, and limitations.
 - `LlamaTune/DESCRIPTION.md` — explains what the llama.cpp launch optimizer does, how to use
   it, how the memory estimate is computed, and its caveats.
 

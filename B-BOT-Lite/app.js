@@ -7,7 +7,7 @@
   const MAX_MESSAGES = 200;
 
   const DEFAULT_SYSTEM_PROMPT =
-    "You are B-BOT, a small, practical assistant for everyday tasks. Be concise and direct. Use short paragraphs, steps, or lists when they help. Ask one brief clarifying question only when the task cannot be done without it. Never invent facts or links.";
+    "You are B-BOT Lite, a small, practical assistant for everyday tasks. Be concise and direct. Use short paragraphs, steps, or lists when they help. Ask one brief clarifying question only when the task cannot be done without it. Never invent facts or links.";
 
   const DEFAULT_SETTINGS = {
     baseUrl: "http://localhost:8080/v1",
@@ -62,7 +62,7 @@
     "</svg>";
 
   const TYPING_HTML =
-    '<div class="typing" aria-label="B-BOT is typing"><span></span><span></span><span></span></div>';
+    '<div class="typing" aria-label="B-BOT Lite is typing"><span></span><span></span><span></span></div>';
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -437,7 +437,7 @@
     if (state.streaming) {
       els.connectionLabel.textContent = "Streaming…";
       pill.classList.add("is-live");
-      pill.title = "B-BOT is replying";
+      pill.title = "B-BOT Lite is replying";
     } else if (!state.settings.baseUrl.trim()) {
       els.connectionLabel.textContent = "Add endpoint";
       pill.classList.add("is-warn");
@@ -499,7 +499,7 @@
 
     const author = document.createElement("span");
     author.className = "message-author";
-    author.textContent = message.role === "assistant" ? "B-BOT" : "You";
+    author.textContent = message.role === "assistant" ? "B-BOT Lite" : "You";
 
     const time = document.createElement("span");
     time.className = "message-time";
@@ -713,7 +713,7 @@
 
     paintMessage(message);
     saveChat();
-    setSrStatus(message.error ? "B-BOT returned an error." : "B-BOT replied.");
+    setSrStatus(message.error ? "B-BOT Lite returned an error." : "B-BOT Lite replied.");
   }
 
   function stopAssistant(message, startedAt) {
@@ -814,7 +814,7 @@
     applyStreamingState(true);
     updateEmptyState();
     scrollToBottom(true);
-    setSrStatus("B-BOT is replying.");
+    setSrStatus("B-BOT Lite is replying.");
 
     const requestMessages = buildRequestMessages();
 
@@ -950,7 +950,7 @@
       ".md";
 
     const lines = [
-      "# B-BOT conversation",
+      "# B-BOT Lite conversation",
       "",
       "- Model: `" + (state.settings.model || "unknown") + "`",
       "- Endpoint: `" + (state.settings.baseUrl || "unknown") + "`",
@@ -959,7 +959,7 @@
     ];
 
     state.messages.forEach(function (message) {
-      lines.push(message.role === "user" ? "## You" : "## B-BOT", "");
+      lines.push(message.role === "user" ? "## You" : "## B-BOT Lite", "");
 
       if (message.error) {
         lines.push("> Error: " + message.content);

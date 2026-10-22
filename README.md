@@ -4,9 +4,13 @@
 
 ## Directory
 
-### [B-BOT](B-BOT/index.html)
+### [B-BOT Lite](B-BOT-Lite/index.html)
 
 A lightweight, dependency-free everyday AI assistant. Connects directly to any OpenAI-compatible endpoint, streams replies, and keeps the conversation in your browser.
+
+### [B-BOT Advanced](B-BOT-Advanced/PLAN.md)
+
+Planned always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses a remote OpenAI-compatible LLM, local voice interaction, plugins, reminders, home automation, and a project workspace. See the [development plan](B-BOT-Advanced/PLAN.md).
 
 ### [LlamaTune](LlamaTune/index.html)
 
