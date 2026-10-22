@@ -1,0 +1,40 @@
+# Server
+host: 127.0.0.1
+port: 8000
+
+# Authentication: one household-wide bearer token.
+# Prefer setting B_BOT_AUTH_TOKEN in .env instead of writing it here.
+auth_token: ""
+
+# OpenAI-compatible chat completion endpoint (inference machine).
+llm:
+  base_url: "http://inference-machine:8080/v1"
+  model: ""
+  api_key: ""
+  temperature: 0.7
+  max_tokens: 1024
+  timeout: 120.0
+
+# Remote Whisper endpoint (reserved for the voice milestone).
+stt:
+  base_url: "http://inference-machine:8080/v1"
+  model: "whisper-1"
+  api_key: ""
+  language: "auto"
+
+# Local storage.
+database_path: "data/b-bot.db"
+projects_path: "data/projects"
+backups_path: "data/backups"
+
+# Voice service (reserved for the voice milestone).
+voice:
+  enabled: false
+  microphone: ""
+  speaker: ""
+  wake_words:
+    en: "b-bot"
+    es: "bebote"
+
+# LAN-only by default. Set to true only behind a trusted reverse proxy.
+allow_cors: false

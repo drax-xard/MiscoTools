@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>B-BOT Advanced</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot" id="status-dot"></span>
+      <h1>B-BOT <span>Advanced</span></h1>
+    </div>
+    <div class="actions">
+      <input id="token" type="password" placeholder="Household token" autocomplete="off">
+      <button id="save-token" type="button">Save</button>
+      <a id="export" class="button" href="#" hidden>Export</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <button id="new-chat" class="primary" type="button">New chat</button>
+      <ul id="conversations" class="conversations"></ul>
+    </aside>
+
+    <section class="chat">
+      <div id="messages" class="messages">
+        <p class="empty">Start a conversation. Replies are streamed from the remote model.</p>
+      </div>
+      <form id="composer" class="composer">
+        <textarea id="input" rows="2" placeholder="Ask B-BOT..." required></textarea>
+        <button id="send" class="primary" type="submit">Send</button>
+        <button id="stop" type="button" hidden>Stop</button>
+      </form>
+      <p id="error" class="error" hidden></p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -9,6 +9,22 @@ Versions are project-wide: a release covers every tool in the collection.
 
 ## [Unreleased]
 
+### Added
+
+- **B-BOT Advanced** backend foundation:
+  - FastAPI service with a public `/health` endpoint and configurable
+    `config.yaml` / `.env` loading.
+  - Bearer-token authentication for all `/api` routes, failing closed when no token
+    is configured.
+  - SQLite storage in WAL mode with the planned data-model schema and FTS5 indexes.
+  - Conversation list, create, rename, delete, streamed chat replies over SSE, and
+    Markdown export.
+  - Read-only settings endpoint with redacted secrets and an editable system prompt.
+  - Dependency-free web chat client under `B-BOT-Advanced/frontend/`.
+  - Architecture, plugin API, voice, deployment, and discovery documentation.
+  - Pytest suite covering health, auth, conversation CRUD, streaming, export, and
+    settings.
+
 ### Changed
 
 - Renamed the static B-BOT assistant to **B-BOT Lite** and added the **B-BOT Advanced**

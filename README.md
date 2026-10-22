@@ -8,9 +8,9 @@
 
 A lightweight, dependency-free everyday AI assistant. Connects directly to any OpenAI-compatible endpoint, streams replies, and keeps the conversation in your browser.
 
-### [B-BOT Advanced](B-BOT-Advanced/PLAN.md)
+### [B-BOT Advanced](B-BOT-Advanced/README.md)
 
-Planned always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses a remote OpenAI-compatible LLM, local voice interaction, plugins, reminders, home automation, and a project workspace. See the [development plan](B-BOT-Advanced/PLAN.md).
+Always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses a remote OpenAI-compatible LLM, local voice interaction, plugins, reminders, home automation, and a project workspace. The FastAPI backend, streamed chat MVP, SQLite storage, and web client are in place. See the [development plan](B-BOT-Advanced/PLAN.md).
 
 ### [LlamaTune](LlamaTune/index.html)
 
