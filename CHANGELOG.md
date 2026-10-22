@@ -9,8 +9,16 @@ Versions are project-wide: a release covers every tool in the collection.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-22
+
 ### Added
 
+- **B-BOT** — standalone, dependency-free everyday AI assistant that connects directly to any
+  OpenAI-compatible endpoint.
+  - Endpoint, model, API key, temperature, token limit, and system-prompt settings.
+  - Model discovery, streamed replies, stop, retry, copy, new chat, and Markdown export.
+  - Safe built-in Markdown rendering, responsive layout, and browser-local chat persistence.
+- `B-BOT/DESCRIPTION.md` — setup, compatible endpoints, CORS notes, privacy, and limitations.
 - `LlamaTune/DESCRIPTION.md` — explains what the llama.cpp launch optimizer does, how to use
   it, how the memory estimate is computed, and its caveats.
 
@@ -35,4 +43,5 @@ Initial release of the MiscoTools collection.
 - Root `README.md` listing the tools in the collection.
 
 [Unreleased]: https://github.com/drax-xard/MiscoTools/commits/main
+[0.2.0]: https://github.com/drax-xard/MiscoTools/tree/v0.2.0
 [0.1.0]: https://github.com/drax-xard/MiscoTools/tree/921a895

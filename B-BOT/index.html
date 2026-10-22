@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="B-BOT is a lightweight, dependency-free everyday AI assistant that talks to any OpenAI-compatible endpoint.">
+  <meta name="color-scheme" content="dark">
+  <title>B-BOT — everyday AI assistant</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0b10'/%3E%3Crect x='6' y='9' width='20' height='15' rx='5' fill='none' stroke='%23ffd166' stroke-width='2'/%3E%3Ccircle cx='12.5' cy='16' r='1.7' fill='%23ffd166'/%3E%3Ccircle cx='19.5' cy='16' r='1.7' fill='%23ffd166'/%3E%3Cpath d='M12 20.5h8' stroke='%23ffd166' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M16 9V6' stroke='%23ffd166' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M16 8V4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <circle cx="16" cy="3.2" r="1.3" fill="currentColor"/>
+          <rect x="5" y="8" width="22" height="17" rx="5.5" stroke="currentColor" stroke-width="1.7"/>
+          <circle cx="11.8" cy="15.4" r="1.6" fill="currentColor"/>
+          <circle cx="20.2" cy="15.4" r="1.6" fill="currentColor"/>
+          <path d="M11.5 20.3h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M2.7 13.5v6M29.3 13.5v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">B-BOT</span>
+        <span class="brand-tag">small model, everyday help</span>
+      </span>
+    </div>
+
+    <div class="topbar-actions">
+      <span class="connection-pill" id="connection-pill" title="Open settings to connect an endpoint">
+        <span class="connection-dot" aria-hidden="true"></span>
+        <span id="connection-label">Setup needed</span>
+      </span>
+      <button class="ghost-button" id="export-chat" type="button" title="Export conversation as Markdown">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 2.5v7M5.3 6.8 8 9.5l2.7-2.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2.8 10.5v1.8a1.2 1.2 0 0 0 1.2 1.2h8a1.2 1.2 0 0 0 1.2-1.2v-1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <span>Export</span>
+      </button>
+      <button class="ghost-button" id="new-chat" type="button" title="Start a new conversation">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 3.2v9.6M3.2 8h9.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span>New chat</span>
+      </button>
+      <button class="ghost-button mobile-only" id="toggle-sidebar" type="button" aria-label="Open settings" aria-controls="sidebar" aria-expanded="false">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2.5 5h11M2.5 8h11M2.5 11h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="6" cy="5" r="1.4" fill="#08090d" stroke="currentColor" stroke-width="1.1"/>
+          <circle cx="10.5" cy="8" r="1.4" fill="#08090d" stroke="currentColor" stroke-width="1.1"/>
+          <circle cx="5" cy="11" r="1.4" fill="#08090d" stroke="currentColor" stroke-width="1.1"/>
+        </svg>
+        <span>Settings</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Connection settings">
+      <div class="sidebar-head">
+        <div>
+          <p class="kicker">Connection</p>
+          <h2>Your endpoint</h2>
+        </div>
+        <button class="sidebar-close mobile-only" id="close-sidebar" type="button" aria-label="Close settings">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <p class="sidebar-copy">B-BOT speaks the OpenAI chat API. Point it at a local model or any compatible service. Requests go straight from this page.</p>
+
+      <form id="settings-form" autocomplete="off" novalidate>
+        <div class="field">
+          <label for="base-url">API base URL</label>
+          <input id="base-url" name="base-url" type="text" inputmode="url" placeholder="http://localhost:8080/v1" spellcheck="false">
+          <p class="field-hint">Usually ends in <code>/v1</code>. A full <code>/chat/completions</code> URL works too.</p>
+        </div>
+
+        <div class="field">
+          <label for="api-key">API key <span class="optional">optional</span></label>
+          <div class="secret-wrap">
+            <input id="api-key" name="api-key" type="password" placeholder="sk-…" spellcheck="false">
+            <button class="secret-toggle" id="toggle-key" type="button" aria-label="Show API key">Show</button>
+          </div>
+          <p class="field-hint">Kept in this browser only. Leave blank for local servers.</p>
+        </div>
+
+        <div class="field">
+          <label for="model">Model</label>
+          <input id="model" name="model" type="text" list="model-list" placeholder="llama-3.2-3b-instruct" spellcheck="false">
+          <datalist id="model-list"></datalist>
+        </div>
+
+        <div class="connection-test">
+          <button class="button subtle" id="test-connection" type="button">Test connection</button>
+          <span class="test-status" id="test-status" role="status"></span>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="temperature">Temperature <output id="temperature-value" for="temperature">0.7</output></label>
+            <input id="temperature" name="temperature" type="range" min="0" max="1.5" step="0.1" value="0.7">
+          </div>
+          <div class="field">
+            <label for="max-tokens">Max tokens</label>
+            <input id="max-tokens" name="max-tokens" type="number" min="64" max="32768" step="64" value="1024" inputmode="numeric">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="system-prompt">System prompt</label>
+          <textarea id="system-prompt" name="system-prompt" rows="5" spellcheck="false"></textarea>
+        </div>
+      </form>
+
+      <div class="sidebar-foot">
+        <div class="local-note">
+          <span class="local-dot" aria-hidden="true"></span>
+          <span>No proxy, telemetry, or cloud storage. Your key and chat stay in this browser.</span>
+        </div>
+        <p class="sidebar-meta">B-BOT · v0.2.0 · OpenAI-compatible</p>
+      </div>
+    </aside>
+
+    <main class="chat">
+      <div class="transcript" id="transcript">
+        <div class="transcript-inner">
+          <section class="empty-state" id="empty-state">
+            <div class="empty-mark" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M16 8V4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <circle cx="16" cy="3.2" r="1.3" fill="currentColor"/>
+                <rect x="5" y="8" width="22" height="17" rx="5.5" stroke="currentColor" stroke-width="1.7"/>
+                <circle cx="11.8" cy="15.4" r="1.6" fill="currentColor"/>
+                <circle cx="20.2" cy="15.4" r="1.6" fill="currentColor"/>
+                <path d="M11.5 20.3h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M2.7 13.5v6M29.3 13.5v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="kicker">Everyday assistant</p>
+            <h1>What's on your <em>plate?</em></h1>
+            <p class="empty-copy">Plan a day, untangle notes, draft a message, or just ask a question. B-BOT keeps things short and practical, using the small model you choose.</p>
+            <p class="empty-setup" id="empty-setup">First time here? <button class="text-link" id="empty-settings" type="button">Set your endpoint and model</button>.</p>
+
+            <div class="starter-grid" aria-label="Starter prompts">
+              <button class="starter" type="button" data-starter="plan">
+                <span class="starter-index">01</span>
+                <span class="starter-text">
+                  <strong>Plan my day</strong>
+                  <span>Turn a messy list into a realistic schedule.</span>
+                </span>
+              </button>
+              <button class="starter" type="button" data-starter="draft">
+                <span class="starter-index">02</span>
+                <span class="starter-text">
+                  <strong>Draft a message</strong>
+                  <span>Write something clear and friendly.</span>
+                </span>
+              </button>
+              <button class="starter" type="button" data-starter="summarize">
+                <span class="starter-index">03</span>
+                <span class="starter-text">
+                  <strong>Summarize</strong>
+                  <span>Boil long text down to the useful bits.</span>
+                </span>
+              </button>
+              <button class="starter" type="button" data-starter="todos">
+                <span class="starter-index">04</span>
+                <span class="starter-text">
+                  <strong>Make a to-do list</strong>
+                  <span>Sort notes into priorities and next steps.</span>
+                </span>
+              </button>
+              <button class="starter" type="button" data-starter="explain">
+                <span class="starter-index">05</span>
+                <span class="starter-text">
+                  <strong>Explain simply</strong>
+                  <span>Translate jargon into plain language.</span>
+                </span>
+              </button>
+              <button class="starter" type="button" data-starter="brainstorm">
+                <span class="starter-index">06</span>
+                <span class="starter-text">
+                  <strong>Brainstorm</strong>
+                  <span>Get five practical ideas, fast.</span>
+                </span>
+              </button>
+            </div>
+          </section>
+
+          <div class="messages" id="messages"></div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer-inner">
+          <form class="composer" id="composer">
+            <label class="sr-only" for="prompt">Message B-BOT</label>
+            <textarea id="prompt" name="prompt" rows="1" placeholder="Ask B-BOT anything…" autocomplete="off"></textarea>
+            <button class="send-button" id="send" type="submit" aria-label="Send message" title="Send">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 10h11M11 5.5 15.5 10 11 14.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="stop-button" id="stop" type="button" aria-label="Stop response" title="Stop" hidden>
+              <span aria-hidden="true"></span>
+            </button>
+          </form>
+          <div class="composer-meta">
+            <span><kbd>Enter</kbd> to send · <kbd>Shift</kbd> + <kbd>Enter</kbd> for a new line</span>
+            <span class="composer-note">Saved in this browser</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="sr-only" id="sr-status" aria-live="polite"></div>
+
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

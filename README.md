@@ -4,6 +4,10 @@
 
 ## Directory
 
+### [B-BOT](B-BOT/index.html)
+
+A lightweight, dependency-free everyday AI assistant. Connects directly to any OpenAI-compatible endpoint, streams replies, and keeps the conversation in your browser.
+
 ### [LlamaTune](LlamaTune/index.html)
 
 Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use.
