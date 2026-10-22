@@ -16,8 +16,9 @@ Outputs:
 
 - **Launch command** with `--model`, `--alias`, `--n-gpu-layers`, `--ctx-size`, `--parallel`,
   `--threads`, `--threads-batch`, `--batch-size`, `--ubatch-size`, `--flash-attn`, and
-  `--cache-type-k` / `--cache-type-v` when the KV cache is quantized.
-- **Metrics**: usable context, GPU layers vs. total, KV cache type and size, speed class
+  independent `--cache-type-k` / `--cache-type-v` flags when either KV cache is quantized.
+- **Saved preset**: downloads the launch command as an executable bash script with a shebang.
+- **Metrics**: usable context, GPU layers vs. total, KV cache types and size, speed class
   (GPU-bound / Fast / Mixed / CPU-heavy / CPU-only).
 - **Memory envelope**: stacked bars for VRAM and system RAM showing weights, KV cache,
   compute buffers, reserve, and what is left free.
@@ -30,15 +31,18 @@ Outputs:
    no network traffic — everything runs locally in the page.
 2. Fill in **Your hardware**: GPU VRAM (GiB), system RAM (GiB), CPU threads, and enable
    *Unified memory* for Apple Silicon / APUs.
-3. Fill in **Your model**: name, parameter count in billions, quantization (Q4_K_M by
-   default), and the model's max native context.
-4. Optionally open **Architecture estimate** to override the auto-detected KV geometry
+3. Fill in **Your model**, or load a local `.gguf` file. The loader reads the real parameter
+   count, native context, quantization, and KV geometry directly from the file in the browser;
+   the model never leaves your machine.
+4. Set the K and V KV cache precisions independently (Q8_0 for both by default).
+5. Optionally open **Architecture estimate** to override the auto-detected KV geometry
    (layers, KV heads, head dim) if your GGUF differs from the preset.
-5. Pick an **Optimization target**:
+6. Pick an **Optimization target**:
    - **Speed** — maximize GPU offload; context only needs 2K to qualify.
    - **Balanced** — keep all layers on the GPU when at least 8K context fits (default).
    - **Context** — trade GPU layers away for a longer KV cache.
-6. Click **Copy**, replace `/models/...` with your real GGUF path, and run the command.
+7. Click **Copy**, replace `/models/...` with your real GGUF path, and run the command. Or
+   click **Save script** to download a ready-to-run `.sh` preset.
 
 The plan recomputes live on every input change. `optimizer.js` is also usable directly from
 Node (`require("./optimizer.js").calculatePlan({...})`) if you want to script the estimates.
@@ -47,8 +51,8 @@ Node (`require("./optimizer.js").calculatePlan({...})`) if you want to script th
 
 - **Weights** — `params × bpw × 1.01` (1% GGUF metadata overhead), using the bit-width of
   the selected quantization.
-- **KV cache** — `layers × KV heads × head dim × 2 (K and V) × 2 bytes` at F16, scaled by
-  the cache type factor (Q8_0 ≈ 0.53×, Q4_0 ≈ 0.28×).
+- **KV cache** — `layers × KV heads × head dim × 2 (K and V) × 2 bytes` at F16, with the K
+  and V halves scaled independently by their cache type factor (Q8_0 ≈ 0.53×, Q4_0 ≈ 0.28×).
 - **Runtime** — roughly `0.8 + 1% of weights`, split between GPU compute buffers and host
   overhead.
 - **Reserves** — headroom for the display, CUDA/Metal context, and OS (7% of VRAM, capped;

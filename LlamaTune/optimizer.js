@@ -52,6 +52,78 @@
     q4_0: "Q4_0",
   };
 
+  const GGUF_MAGIC = 0x46554747;
+  const GGUF_MAX_DIMS = 8;
+  const GGUF_MAX_STRING_BYTES = 4 * 1024 * 1024;
+  const GGUF_MAX_ARRAY_ITEMS = 10000000;
+
+  const GGUF_FILE_TYPE_QUANTS = {
+    1: "F16",
+    2: "Q4_0",
+    3: "Q4_1",
+    4: "Q4_1",
+    7: "Q8_0",
+    8: "Q5_0",
+    9: "Q5_1",
+    10: "Q2_K",
+    11: "Q3_K_S",
+    12: "Q3_K_M",
+    13: "Q3_K_L",
+    14: "Q4_K_S",
+    15: "Q4_K_M",
+    16: "Q5_K_S",
+    17: "Q5_K_M",
+    18: "Q6_K",
+  };
+
+  const GGML_TYPE_QUANTS = {
+    1: "F16",
+    2: "Q4_0",
+    3: "Q4_1",
+    6: "Q5_0",
+    7: "Q5_1",
+    8: "Q8_0",
+    10: "Q2_K",
+    11: "Q3_K_M",
+    12: "Q4_K_M",
+    13: "Q5_K_M",
+    14: "Q6_K",
+    16: "IQ2_XXS",
+    17: "IQ2_XS",
+    18: "IQ3_XXS",
+    19: "IQ1_S",
+    22: "IQ2_S",
+    29: "IQ1_M",
+    30: "BF16",
+  };
+
+  const GGUF_ARCH_PROFILES = {
+    llama: "llama3",
+    qwen2: "qwen2",
+    qwen3: "qwen3",
+    mistral: "mistral",
+    mixtral: "mistral",
+    gemma2: "gemma2",
+    gemma3: "gemma3",
+    phi3: "phi",
+    phi4: "phi",
+    deepseek2: "deepseek",
+    "command-r": "command",
+    command_r: "command",
+    yi: "yi",
+  };
+
+  function resolveKvTypes(input) {
+    const fallback = input.kvType;
+    const k = KV_FACTORS[input.kvTypeK] ? input.kvTypeK : fallback;
+    const v = KV_FACTORS[input.kvTypeV] ? input.kvTypeV : fallback;
+    return { k, v };
+  }
+
+  function combinedKvFactor(k, v) {
+    return (KV_FACTORS[k] + KV_FACTORS[v]) / 2;
+  }
+
   const PROFILE_DEFS = {
     llama3: {
       label: "Llama 3.x",
@@ -298,7 +370,10 @@
     if (!Number.isFinite(nativeCtx) || nativeCtx < 512) throw new Error("Native context must be at least 512 tokens.");
     if (!Number.isFinite(threads) || threads < 1) throw new Error("CPU threads must be at least 1.");
     if (!QUANTS[input.quantKey]) throw new Error("Choose a supported quantization.");
-    if (!KV_FACTORS[input.kvType]) throw new Error("Choose a supported KV cache type.");
+    const kvTypes = resolveKvTypes(input);
+    if (!KV_FACTORS[kvTypes.k] || !KV_FACTORS[kvTypes.v]) {
+      throw new Error("Choose supported KV cache types for both K and V.");
+    }
   }
 
   function buildCandidate(options, ngl) {
@@ -442,11 +517,12 @@
       { flag: "--flash-attn", value: "on", type: "value" },
     ];
 
-    if (input.kvType !== "f16") {
-      args.push(
-        { flag: "--cache-type-k", value: input.kvType, type: "value" },
-        { flag: "--cache-type-v", value: input.kvType, type: "value" }
-      );
+    const kvTypes = resolveKvTypes(input);
+    if (kvTypes.k !== "f16") {
+      args.push({ flag: "--cache-type-k", value: kvTypes.k, type: "value" });
+    }
+    if (kvTypes.v !== "f16") {
+      args.push({ flag: "--cache-type-v", value: kvTypes.v, type: "value" });
     }
 
     return args;
@@ -486,20 +562,20 @@
       title: `${plan.ctx.toLocaleString("en-US")} tokens of usable context.`,
       text:
         plan.ctx >= input.nativeCtx
-          ? `That is the model's full native context. ${formatGiB(totalKvGiB)} GiB of KV cache is allocated with ${KV_LABELS[input.kvType]}.`
-          : `The ${context.limitedBy} caps context below the ${input.nativeCtx.toLocaleString("en-US")} native maximum. ${formatGiB(totalKvGiB)} GiB of KV cache is allocated with ${KV_LABELS[input.kvType]}.`,
+          ? `That is the model's full native context. ${formatGiB(totalKvGiB)} GiB of KV cache is allocated with ${plan.kvLabel}.`
+          : `The ${context.limitedBy} caps context below the ${input.nativeCtx.toLocaleString("en-US")} native maximum. ${formatGiB(totalKvGiB)} GiB of KV cache is allocated with ${plan.kvLabel}.`,
     });
 
-    if (input.kvType !== "f16") {
-      const saved = (1 - KV_FACTORS[input.kvType]) * 100;
+    if (plan.kvTypeK !== "f16" || plan.kvTypeV !== "f16") {
+      const saved = (1 - plan.kvFactor) * 100;
       insights.push({
-        title: `${KV_LABELS[input.kvType]} KV cache is paired with flash attention.`,
-        text: `It cuts KV memory by about ${Math.round(saved)}% versus F16. Keep both cache-type flags and --flash-attn on together; quantized V cache depends on flash attention.`,
+        title: `${plan.kvLabel} KV cache is paired with flash attention.`,
+        text: `It cuts KV memory by about ${Math.round(saved)}% versus F16. Keep the cache-type flags and --flash-attn on together; quantized V cache depends on flash attention.`,
       });
     } else {
       insights.push({
         title: "F16 KV cache preserves maximum cache quality.",
-        text: "F16 uses more VRAM than Q8_0. If context is capped, switch the KV cache precision to Q8_0 and rerun.",
+        text: "F16 uses more VRAM than Q8_0. If context is capped, switch the K and V cache precision to Q8_0 and rerun.",
       });
     }
 
@@ -564,7 +640,8 @@
       warnings.push("System RAM is estimated to be over budget. llama.cpp may page the GGUF from disk and slow down sharply.");
     }
 
-    if (input.kvType === "q4_0") {
+    const kvTypes = resolveKvTypes(input);
+    if (kvTypes.k === "q4_0" || kvTypes.v === "q4_0") {
       warnings.push("Q4_0 KV cache can noticeably reduce long-context quality. Prefer Q8_0 unless you need the last few thousand tokens of context.");
     }
 
@@ -600,7 +677,12 @@
     const quant = QUANTS[input.quantKey];
     const weightsGiB = estimateWeightsGiB(paramsB, input.quantKey);
     const runtimeGiB = estimateRuntimeGiB(weightsGiB);
-    const kvFactor = KV_FACTORS[input.kvType];
+    const kvTypes = resolveKvTypes(input);
+    const kvFactor = combinedKvFactor(kvTypes.k, kvTypes.v);
+    const kvLabel =
+      kvTypes.k === kvTypes.v
+        ? KV_LABELS[kvTypes.k]
+        : `K: ${KV_LABELS[kvTypes.k]} · V: ${KV_LABELS[kvTypes.v]}`;
     const kvBytesPerToken = profile.kvBytesPerTokenF16 * kvFactor;
     const { reserveVram, reserveRam, vramSafety } = reservesFor(vramGiB, ramGiB, unified);
 
@@ -655,8 +737,10 @@
       profile,
       weightsGiB,
       quant,
-      kvType: input.kvType,
-      kvLabel: KV_LABELS[input.kvType],
+      kvTypeK: kvTypes.k,
+      kvTypeV: kvTypes.v,
+      kvType: kvTypes.k === kvTypes.v ? kvTypes.k : null,
+      kvLabel,
       kvFactor,
       runtimeGiB,
       totalKvGiB,
@@ -702,6 +786,331 @@
     return plan;
   }
 
+  function parseGGUF(buffer) {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    if (bytes.byteLength < 24) {
+      throw new Error("File is too small to be a GGUF model.");
+    }
+
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let littleEndian;
+    if (view.getUint32(0, true) === GGUF_MAGIC) {
+      littleEndian = true;
+    } else if (view.getUint32(0, false) === GGUF_MAGIC) {
+      littleEndian = false;
+    } else {
+      throw new Error("Not a GGUF file (bad magic bytes).");
+    }
+
+    const version = view.getUint32(4, littleEndian);
+    if (version < 2 || version > 3) {
+      throw new Error(`Unsupported GGUF version ${version}. This tool reads v2 and v3 files.`);
+    }
+
+    let offset = 8;
+    const decoder = new TextDecoder("utf-8");
+    const tensorCount = u64();
+    const metadataCount = u64();
+
+    function ensure(count) {
+      if (!Number.isSafeInteger(count) || count < 0 || offset + count > bytes.byteLength) {
+        throw new Error("GGUF metadata is truncated or larger than the loaded portion of the file.");
+      }
+    }
+
+    function u8() {
+      ensure(1);
+      const value = view.getUint8(offset);
+      offset += 1;
+      return value;
+    }
+
+    function i8() {
+      ensure(1);
+      const value = view.getInt8(offset);
+      offset += 1;
+      return value;
+    }
+
+    function u16() {
+      ensure(2);
+      const value = view.getUint16(offset, littleEndian);
+      offset += 2;
+      return value;
+    }
+
+    function i16() {
+      ensure(2);
+      const value = view.getInt16(offset, littleEndian);
+      offset += 2;
+      return value;
+    }
+
+    function u32() {
+      ensure(4);
+      const value = view.getUint32(offset, littleEndian);
+      offset += 4;
+      return value;
+    }
+
+    function i32() {
+      ensure(4);
+      const value = view.getInt32(offset, littleEndian);
+      offset += 4;
+      return value;
+    }
+
+    function f32() {
+      ensure(4);
+      const value = view.getFloat32(offset, littleEndian);
+      offset += 4;
+      return value;
+    }
+
+    function u64() {
+      ensure(8);
+      const value = view.getBigUint64(offset, littleEndian);
+      offset += 8;
+      if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+        throw new Error("GGUF value exceeds JavaScript's safe integer range.");
+      }
+      return Number(value);
+    }
+
+    function i64() {
+      ensure(8);
+      const value = view.getBigInt64(offset, littleEndian);
+      offset += 8;
+      if (value > BigInt(Number.MAX_SAFE_INTEGER) || value < BigInt(Number.MIN_SAFE_INTEGER)) {
+        throw new Error("GGUF value exceeds JavaScript's safe integer range.");
+      }
+      return Number(value);
+    }
+
+    function f64() {
+      ensure(8);
+      const value = view.getFloat64(offset, littleEndian);
+      offset += 8;
+      return value;
+    }
+
+    function readString(maxBytes = GGUF_MAX_STRING_BYTES) {
+      const length = u64();
+      if (length > maxBytes) {
+        throw new Error("GGUF string is too large to parse.");
+      }
+      ensure(length);
+      const value = decoder.decode(bytes.subarray(offset, offset + length));
+      offset += length;
+      return value;
+    }
+
+    function skipString() {
+      const length = u64();
+      ensure(length);
+      offset += length;
+    }
+
+    function skipBytes(count) {
+      ensure(count);
+      offset += count;
+    }
+
+    function readScalar(type) {
+      switch (type) {
+        case 0:
+          return u8();
+        case 1:
+          return i8();
+        case 2:
+          return u16();
+        case 3:
+          return i16();
+        case 4:
+          return u32();
+        case 5:
+          return i32();
+        case 6:
+          return f32();
+        case 7:
+          return u8() !== 0;
+        case 8:
+          return readString();
+        case 10:
+          return u64();
+        case 11:
+          return i64();
+        case 12:
+          return f64();
+        default:
+          throw new Error(`Unsupported GGUF metadata value type ${type}.`);
+      }
+    }
+
+    function skipValue(type, depth) {
+      if (depth > 8) {
+        throw new Error("GGUF metadata arrays are nested too deeply.");
+      }
+
+      switch (type) {
+        case 0:
+        case 1:
+        case 7:
+          skipBytes(1);
+          return;
+        case 2:
+        case 3:
+          skipBytes(2);
+          return;
+        case 4:
+        case 5:
+        case 6:
+          skipBytes(4);
+          return;
+        case 8:
+          skipString();
+          return;
+        case 10:
+        case 11:
+        case 12:
+          skipBytes(8);
+          return;
+        case 9: {
+          const nestedType = u32();
+          const length = u64();
+          if (length > GGUF_MAX_ARRAY_ITEMS) {
+            throw new Error("GGUF metadata array is too large to parse.");
+          }
+          if (nestedType === 9) {
+            for (let index = 0; index < length; index += 1) {
+              skipValue(nestedType, depth + 1);
+            }
+          } else {
+            const sizes = { 0: 1, 1: 1, 2: 2, 3: 2, 4: 4, 5: 4, 6: 4, 7: 1, 10: 8, 11: 8, 12: 8 };
+            if (nestedType === 8) {
+              for (let index = 0; index < length; index += 1) {
+                skipString();
+              }
+            } else if (sizes[nestedType]) {
+              skipBytes(length * sizes[nestedType]);
+            } else {
+              throw new Error(`Unsupported GGUF array value type ${nestedType}.`);
+            }
+          }
+          return;
+        }
+        default:
+          throw new Error(`Unsupported GGUF metadata value type ${type}.`);
+      }
+    }
+
+    const interestingKey =
+      /^(general\.(architecture|name|file_type|alignment|size_label)|.+\.(context_length|block_count|embedding_length|expert_count|expert_used_count|attention\.head_count|attention\.head_count_kv|attention\.key_length|attention\.value_length))$/;
+
+    const metadata = {};
+    if (metadataCount > GGUF_MAX_ARRAY_ITEMS) {
+      throw new Error("GGUF metadata table is too large to parse.");
+    }
+
+    for (let index = 0; index < metadataCount; index += 1) {
+      const key = readString(65535);
+      if (!interestingKey.test(key)) {
+        skipValue(u32(), 0);
+        continue;
+      }
+
+      const type = u32();
+      if (type === 9) {
+        skipValue(type, 0);
+      } else {
+        metadata[key] = readScalar(type);
+      }
+    }
+
+    if (tensorCount > GGUF_MAX_ARRAY_ITEMS) {
+      throw new Error("GGUF tensor table is too large to parse.");
+    }
+
+    const tensorTypes = new Map();
+    let parameterCount = 0;
+
+    for (let index = 0; index < tensorCount; index += 1) {
+      skipString();
+      const dimensions = u32();
+      if (dimensions > GGUF_MAX_DIMS) {
+        throw new Error("GGUF tensor has an unsupported number of dimensions.");
+      }
+
+      let elements = 1;
+      for (let dimension = 0; dimension < dimensions; dimension += 1) {
+        elements *= u64();
+        if (!Number.isSafeInteger(elements)) {
+          throw new Error("GGUF tensor is too large to count safely.");
+        }
+      }
+
+      const type = u32();
+      u64();
+      parameterCount += elements;
+      if (!Number.isSafeInteger(parameterCount)) {
+        throw new Error("GGUF parameter count exceeds JavaScript's safe integer range.");
+      }
+      tensorTypes.set(type, (tensorTypes.get(type) || 0) + elements);
+    }
+
+    const architecture =
+      typeof metadata["general.architecture"] === "string" ? metadata["general.architecture"] : null;
+    const numericMeta = (key) => {
+      const value = metadata[key];
+      return typeof value === "number" && Number.isFinite(value) ? value : null;
+    };
+    const prefix = architecture;
+    const archMeta = (key) => (prefix ? numericMeta(`${prefix}.${key}`) : null);
+
+    const layers = archMeta("block_count");
+    const headCount = archMeta("attention.head_count");
+    const embeddingLength = archMeta("embedding_length");
+    let kvHeads = archMeta("attention.head_count_kv");
+    if (kvHeads === null) kvHeads = headCount;
+
+    let keyLength = archMeta("attention.key_length");
+    let valueLength = archMeta("attention.value_length");
+    const fallbackHeadDim = headCount > 0 && embeddingLength > 0 ? embeddingLength / headCount : null;
+    if (keyLength === null) keyLength = fallbackHeadDim;
+    if (valueLength === null) valueLength = fallbackHeadDim;
+    const headDim =
+      keyLength !== null && valueLength !== null ? (keyLength + valueLength) / 2 : keyLength ?? valueLength;
+
+    const fileType = numericMeta("general.file_type");
+    let quantKey = fileType !== null ? GGUF_FILE_TYPE_QUANTS[fileType] || null : null;
+    if (!quantKey && tensorTypes.size > 0) {
+      const dominantType = [...tensorTypes.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      quantKey = GGML_TYPE_QUANTS[dominantType] || null;
+    }
+    if (quantKey && !QUANTS[quantKey]) quantKey = null;
+
+    return {
+      version,
+      architecture,
+      archProfile: architecture ? GGUF_ARCH_PROFILES[architecture] || "generic" : "generic",
+      modelName: typeof metadata["general.name"] === "string" ? metadata["general.name"].trim() : null,
+      parameterCount,
+      paramsB: parameterCount > 0 ? parameterCount / 1e9 : null,
+      contextLength: archMeta("context_length"),
+      layers,
+      headCount,
+      kvHeads,
+      embeddingLength,
+      keyLength,
+      valueLength,
+      headDim,
+      fileType,
+      quantKey,
+      tensorCount,
+      alignment: numericMeta("general.alignment"),
+    };
+  }
+
   return {
     QUANTS,
     KV_FACTORS,
@@ -709,6 +1118,7 @@
     PROFILE_DEFS,
     calculatePlan,
     detectFamily,
+    parseGGUF,
     resolveProfile,
     estimateWeightsGiB,
     estimateRuntimeGiB,

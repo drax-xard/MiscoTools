@@ -10,7 +10,7 @@ A lightweight, dependency-free everyday AI assistant. Connects directly to any O
 
 ### [LlamaTune](LlamaTune/index.html)
 
-Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use.
+Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use, reads model metadata directly from local GGUF files, supports separate K/V cache quantization, and saves presets as bash scripts.
 
 ## Shared
 

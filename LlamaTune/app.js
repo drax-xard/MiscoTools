@@ -4,11 +4,14 @@
   const Optimizer = window.LlamaOptimizer;
   if (!Optimizer) return;
 
+  const GGUF_READ_LIMIT = 64 * 1024 * 1024;
+
   const state = {
     strategy: "balanced",
     lastPlan: null,
     lastWarnings: 0,
     copyTimer: null,
+    saveTimer: null,
   };
 
   const STRATEGY_COPY = {
@@ -33,11 +36,14 @@
     cpuModel: $("cpu-model"),
     cpuThreads: $("cpu-threads"),
     unified: $("unified-memory"),
+    ggufFile: $("gguf-file"),
+    ggufStatus: $("gguf-status"),
     modelName: $("model-name"),
     params: $("params"),
     quant: $("quant"),
     nativeContext: $("native-context"),
-    kvCache: $("kv-cache"),
+    kvCacheK: $("kv-cache-k"),
+    kvCacheV: $("kv-cache-v"),
     archProfile: $("arch-profile"),
     archSummary: $("arch-summary"),
     archNote: $("arch-note"),
@@ -63,6 +69,7 @@
     commandSummary: $("command-summary"),
     commandOutput: $("command-output"),
     copyButton: $("copy-button"),
+    saveButton: $("save-button"),
     showWarnings: $("show-warnings"),
     memoryCaption: $("memory-caption"),
     memoryNames: Array.from(document.querySelectorAll(".memory-name")),
@@ -110,7 +117,8 @@
       paramsB: readNumber(els.params),
       quantKey: els.quant.value,
       nativeCtx: readNumber(els.nativeContext),
-      kvType: els.kvCache.value,
+      kvTypeK: els.kvCacheK.value,
+      kvTypeV: els.kvCacheV.value,
       archKey: els.archProfile.value,
       custom: {
         layers: readNumber(els.customLayers),
@@ -162,6 +170,79 @@
     } catch (error) {
       els.archSummary.textContent = "Custom geometry needed";
       els.archNote.textContent = error.message;
+    }
+  }
+
+  function setGgufStatus(message, variant) {
+    els.ggufStatus.textContent = message;
+    els.ggufStatus.classList.remove("is-success", "is-error");
+    if (variant) els.ggufStatus.classList.add(variant);
+  }
+
+  function hasArchOption(value) {
+    return Array.from(els.archProfile.options).some((option) => option.value === value);
+  }
+
+  function applyGgufInfo(info, fileName) {
+    if (info.modelName) {
+      els.modelName.value = info.modelName;
+    } else if (fileName) {
+      els.modelName.value = fileName.replace(/\.gguf$/i, "");
+    }
+
+    if (info.paramsB > 0) {
+      els.params.value = String(Number(info.paramsB.toFixed(2)));
+    }
+
+    if (info.contextLength >= 512) {
+      els.nativeContext.value = String(Math.round(info.contextLength));
+    }
+
+    if (info.quantKey && Optimizer.QUANTS[info.quantKey]) {
+      els.quant.value = info.quantKey;
+    }
+
+    const hasGeometry =
+      Number(info.layers) > 0 && Number(info.kvHeads) > 0 && Number(info.headDim) > 0;
+    if (hasGeometry && info.archProfile !== "deepseek") {
+      els.archProfile.value = "custom";
+      els.customLayers.value = String(Math.round(info.layers));
+      els.customKvHeads.value = String(Math.round(info.kvHeads));
+      els.customHeadDim.value = String(Number(info.headDim.toFixed(2)));
+    } else if (info.archProfile && hasArchOption(info.archProfile)) {
+      els.archProfile.value = info.archProfile;
+    }
+
+    setCustomFieldsVisible();
+    recalculate();
+
+    const details = [];
+    if (info.paramsB > 0) details.push(`${Number(info.paramsB.toFixed(2))}B params`);
+    if (info.contextLength >= 512) details.push(`${Math.round(info.contextLength).toLocaleString("en-US")} ctx`);
+    if (info.quantKey) details.push(info.quantKey);
+    if (hasGeometry) details.push(`${Math.round(info.layers)} layers`);
+
+    const note =
+      details.length > 0
+        ? `Loaded ${fileName}: ${details.join(" · ")}.`
+        : `Loaded ${fileName}, but no usable metadata fields were found.`;
+    setGgufStatus(note, details.length > 0 ? "is-success" : "is-error");
+  }
+
+  async function loadGgufFile() {
+    const file = els.ggufFile.files && els.ggufFile.files[0];
+    if (!file) return;
+
+    setGgufStatus(`Reading ${file.name}…`);
+    try {
+      const slice = file.slice(0, Math.min(file.size, GGUF_READ_LIMIT));
+      const buffer = await slice.arrayBuffer();
+      const info = Optimizer.parseGGUF(new Uint8Array(buffer));
+      applyGgufInfo(info, file.name);
+    } catch (error) {
+      const suffix =
+        file.size > GGUF_READ_LIMIT ? ` Only the first ${GGUF_READ_LIMIT / (1024 * 1024)} MiB were read.` : "";
+      setGgufStatus(`${error.message}${suffix}`, "is-error");
     }
   }
 
@@ -321,6 +402,7 @@
   function renderPlan(plan) {
     state.lastPlan = plan;
     els.copyButton.disabled = false;
+    els.saveButton.disabled = false;
 
     els.planTitle.textContent = TITLES[plan.strategy];
 
@@ -369,6 +451,7 @@
   function renderError(error) {
     state.lastPlan = null;
     els.copyButton.disabled = true;
+    els.saveButton.disabled = true;
     els.planTitle.textContent = "Awaiting valid specs";
     setBadge("Check inputs", "is-danger");
 
@@ -484,6 +567,48 @@
     flashCopyButton(success);
   }
 
+  function buildPresetScript(plan) {
+    const modelName = String(plan.modelName).replace(/[\r\n]+/g, " ").slice(0, 200);
+    return [
+      "#!/usr/bin/env bash",
+      "set -euo pipefail",
+      "",
+      `# llamatune preset — ${modelName}`,
+      `# ${plan.paramsB}B · ${plan.quant.label} · ${plan.ctx} ctx · ${plan.kvLabel} KV`,
+      "",
+      plan.command,
+      "",
+    ].join("\n");
+  }
+
+  function flashSaveButton() {
+    const label = els.saveButton.querySelector("span");
+    if (state.saveTimer) window.clearTimeout(state.saveTimer);
+    label.textContent = "Saved";
+    els.saveButton.classList.add("is-copied");
+    state.saveTimer = window.setTimeout(() => {
+      label.textContent = "Save script";
+      els.saveButton.classList.remove("is-copied");
+      state.saveTimer = null;
+    }, 1800);
+  }
+
+  function savePreset() {
+    if (!state.lastPlan) return;
+    const plan = state.lastPlan;
+    const fileName = `${Optimizer.slugify(`${plan.modelName}-${plan.quant.label}`)}-llama-server.sh`;
+    const blob = new Blob([buildPresetScript(plan)], { type: "text/x-shellscript;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    flashSaveButton();
+  }
+
   function jumpToWarnings() {
     if (state.lastWarnings <= 0) return;
     els.warningBox.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -503,6 +628,8 @@
     });
 
     els.copyButton.addEventListener("click", copyCommand);
+    els.saveButton.addEventListener("click", savePreset);
+    els.ggufFile.addEventListener("change", loadGgufFile);
     els.showWarnings.addEventListener("click", jumpToWarnings);
   }
 

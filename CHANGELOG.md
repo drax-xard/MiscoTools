@@ -9,6 +9,22 @@ Versions are project-wide: a release covers every tool in the collection.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-22
+
+### Added
+
+- **LlamaTune** — local GGUF metadata loading that reads parameter count, native context,
+  quantization, and KV geometry directly in the browser.
+- Independent K and V KV cache quantization selectors with separate `--cache-type-k` and
+  `--cache-type-v` flags and updated memory accounting.
+- Preset export that downloads the generated launch command as a ready-to-run bash script.
+- `Shared/docs/gguf.md` — official GGUF format and metadata specification reference.
+
+### Changed
+
+- Updated LlamaTune and collection documentation for the new GGUF, KV cache, and preset
+  features.
+
 ## [0.2.0] - 2026-10-22
 
 ### Added
@@ -43,5 +59,6 @@ Initial release of the MiscoTools collection.
 - Root `README.md` listing the tools in the collection.
 
 [Unreleased]: https://github.com/drax-xard/MiscoTools/commits/main
+[0.2.1]: https://github.com/drax-xard/MiscoTools/tree/v0.2.1
 [0.2.0]: https://github.com/drax-xard/MiscoTools/tree/v0.2.0
 [0.1.0]: https://github.com/drax-xard/MiscoTools/tree/921a895
