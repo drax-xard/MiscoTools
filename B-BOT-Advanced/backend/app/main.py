@@ -18,30 +18,34 @@ VERSION = "0.1.0"
 
 
 def create_app(config: Optional[AppConfig] = None) -> FastAPI:
+    active_config = config or load_config()
+
+    app = FastAPI(title="B-BOT Advanced", version=VERSION)
+
+    if active_config.allow_cors:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=False,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        active_config = config or load_config()
-        active_config.projects_path.mkdir(parents=True, exist_ok=True)
-        active_config.backups_path.mkdir(parents=True, exist_ok=True)
+        active_config_resolved = getattr(app.state, "config", None) or config or load_config()
+        active_config_resolved.projects_path.mkdir(parents=True, exist_ok=True)
+        active_config_resolved.backups_path.mkdir(parents=True, exist_ok=True)
 
-        database = Database(active_config.database_path)
+        database = Database(active_config_resolved.database_path)
         database.initialize()
 
-        app.state.config = active_config
+        app.state.config = active_config_resolved
         app.state.db = database
-        app.state.llm = LLMProvider(active_config.llm)
-
-        if active_config.allow_cors:
-            app.add_middleware(
-                CORSMiddleware,
-                allow_origins=["*"],
-                allow_credentials=False,
-                allow_methods=["*"],
-                allow_headers=["*"],
-            )
+        app.state.llm = LLMProvider(active_config_resolved.llm)
         yield
 
-    app = FastAPI(title="B-BOT Advanced", version=VERSION, lifespan=lifespan)
+    app.router.lifespan_context = lifespan
 
     app.include_router(chat_router)
     app.include_router(settings_router)
@@ -50,13 +54,8 @@ def create_app(config: Optional[AppConfig] = None) -> FastAPI:
     def health() -> dict:
         state = getattr(app, "state", None)
         database = getattr(state, "db", None) if state else None
-        active_config = getattr(state, "config", None) if state else None
         return {
             "status": "ok",
-            "version": VERSION,
-            "model_configured": bool(active_config and active_config.llm.model),
-            "database": str(database.path) if database else None,
-            "fts_enabled": bool(database and database.fts_enabled),
         }
 
     return app

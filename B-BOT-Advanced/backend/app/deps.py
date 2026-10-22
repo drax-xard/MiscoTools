@@ -42,7 +42,14 @@ async def require_auth(
             detail="Missing bearer token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if not hmac.compare_digest(token, config.auth_token):
+    try:
+        if not hmac.compare_digest(token.encode("utf-8"), config.auth_token.encode("utf-8")):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid bearer token.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except (TypeError, UnicodeError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid bearer token.",

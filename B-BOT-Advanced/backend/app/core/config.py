@@ -12,9 +12,20 @@ from typing import Any, Dict, Optional
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
+
+_PLACEHOLDER_TOKENS = {
+    "change-this-to-a-secret-token",
+    "changeme",
+    "replace-me",
+    "secret",
+    "token",
+    "test",
+    "test-token",
+    "default",
+}
 
 
 class LLMConfig(BaseModel):
@@ -64,6 +75,22 @@ class AppConfig(BaseModel):
     backups_path: Path = Path("data/backups")
     voice: VoiceConfig = Field(default_factory=VoiceConfig)
     allow_cors: bool = False
+
+    @model_validator(mode="after")
+    def _validate_auth_token(self) -> "AppConfig":
+        token = self.auth_token
+        if not token:
+            return self
+        if token.lower() in _PLACEHOLDER_TOKENS:
+            raise ValueError(
+                "B_BOT_AUTH_TOKEN is set to a known placeholder value. "
+                "Generate a strong secret (e.g., `openssl rand -hex 32`) and update your configuration."
+            )
+        if len(token) < 16:
+            raise ValueError(
+                "B_BOT_AUTH_TOKEN is too short. Use at least 16 characters (preferably a random hex/base64 string)."
+            )
+        return self
 
     def redacted(self) -> Dict[str, Any]:
         """Return a copy safe to expose to authenticated clients."""
