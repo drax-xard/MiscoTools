@@ -11,3 +11,9 @@ A lightweight, dependency-free everyday AI assistant. Connects directly to any O
 ### [LlamaTune](LlamaTune/index.html)
 
 Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use.
+
+## Shared
+
+The [Shared](Shared) folder holds information useful to more than one tool.
+
+- [Shared/docs/gguf.md](Shared/docs/gguf.md) - Reference documentation about the GGUF file format.
