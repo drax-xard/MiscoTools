@@ -133,17 +133,24 @@
               <div class="field">
                 <label for="quant">Quantization</label>
                 <select id="quant" name="quant">
+                  <optgroup label="Ternary · PrismML">
+                    <option value="PTQ1_0">PTQ1_0 · 1.75 bpw · dense trits</option>
+                    <option value="PQ2_0">PQ2_0 · 2.13 bpw · 2-bit slots</option>
+                  </optgroup>
                   <optgroup label="1–2 bit">
                     <option value="IQ1_S">IQ1_S · 1.56 bpw</option>
                     <option value="IQ1_M">IQ1_M · 1.75 bpw</option>
                     <option value="IQ2_XXS">IQ2_XXS · 2.06 bpw</option>
                     <option value="IQ2_XS">IQ2_XS · 2.31 bpw</option>
+                    <option value="IQ2_S">IQ2_S · 2.57 bpw</option>
+                    <option value="IQ2_M">IQ2_M · 2.70 bpw</option>
                     <option value="Q2_K">Q2_K · 2.63 bpw</option>
                   </optgroup>
                   <optgroup label="3-bit">
                     <option value="IQ3_XXS">IQ3_XXS · 3.06 bpw</option>
                     <option value="IQ3_XS">IQ3_XS · 3.33 bpw</option>
                     <option value="Q3_K_S">Q3_K_S · 3.44 bpw</option>
+                    <option value="IQ3_M">IQ3_M · 3.78 bpw</option>
                     <option value="Q3_K_M">Q3_K_M · 3.91 bpw</option>
                     <option value="Q3_K_L">Q3_K_L · 4.27 bpw</option>
                   </optgroup>
@@ -164,6 +171,9 @@
                     <option value="Q8_0">Q8_0 · 8.50 bpw</option>
                     <option value="F16">F16 · 16.0 bpw</option>
                     <option value="BF16">BF16 · 16.0 bpw</option>
+                  </optgroup>
+                  <optgroup label="32-bit">
+                    <option value="F32">F32 · 32.0 bpw</option>
                   </optgroup>
                 </select>
               </div>

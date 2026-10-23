@@ -931,6 +931,10 @@ h1 em {
   border-color: var(--kv);
 }
 
+.copy-button.copy-button-secondary.is-copied {
+  color: #11170b;
+}
+
 .copy-button:disabled {
   border-color: var(--border);
   background: var(--surface-raised);

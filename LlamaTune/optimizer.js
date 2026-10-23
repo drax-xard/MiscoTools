@@ -13,6 +13,8 @@
   const UBATCH_SIZE = 512;
 
   const QUANTS = {
+    PTQ1_0: { bpw: 1.75, label: "PTQ1_0", ternary: true, packing: "dense base-3", runtime: "prismml" },
+    PQ2_0: { bpw: 2.125, label: "PQ2_0", ternary: true, packing: "2-bit slots", runtime: "prismml" },
     IQ1_S: { bpw: 1.56, label: "IQ1_S" },
     IQ1_M: { bpw: 1.75, label: "IQ1_M" },
     IQ2_XXS: { bpw: 2.06, label: "IQ2_XXS" },
@@ -38,6 +40,7 @@
     Q8_0: { bpw: 8.5, label: "Q8_0" },
     F16: { bpw: 16.0, label: "F16" },
     BF16: { bpw: 16.0, label: "BF16" },
+    F32: { bpw: 32.0, label: "F32" },
   };
 
   const KV_FACTORS = {
@@ -74,9 +77,12 @@
     16: "Q5_K_S",
     17: "Q5_K_M",
     18: "Q6_K",
+    141: "PQ2_0",
+    143: "PTQ1_0",
   };
 
   const GGML_TYPE_QUANTS = {
+    0: "F32",
     1: "F16",
     2: "Q4_0",
     3: "Q4_1",
@@ -95,6 +101,8 @@
     22: "IQ2_S",
     29: "IQ1_M",
     30: "BF16",
+    142: "PQ2_0",
+    143: "PTQ1_0",
   };
 
   const GGUF_ARCH_PROFILES = {
@@ -579,6 +587,17 @@
       });
     }
 
+    const quant = QUANTS[input.quantKey];
+    if (quant && quant.ternary) {
+      insights.push({
+        title: `${quant.label} stores ternary weights with ${quant.packing} packing.`,
+        text:
+          quant.label === "PQ2_0"
+            ? "PQ2_0 is usually faster at prompt processing. It needs a PrismML llama.cpp build on every backend."
+            : "PTQ1_0 produces the smallest GGUF and can decode faster when memory bandwidth is the bottleneck. It needs a PrismML llama.cpp build on every backend.",
+      });
+    }
+
     if (input.strategy === "context") {
       insights.push({
         title: "Context-first allocation.",
@@ -643,6 +662,13 @@
     const kvTypes = resolveKvTypes(input);
     if (kvTypes.k === "q4_0" || kvTypes.v === "q4_0") {
       warnings.push("Q4_0 KV cache can noticeably reduce long-context quality. Prefer Q8_0 unless you need the last few thousand tokens of context.");
+    }
+
+    const quant = QUANTS[input.quantKey];
+    if (quant && quant.runtime === "prismml") {
+      warnings.push(
+        `${quant.label} uses PrismML ternary tensor types. Run the GGUF with a PrismML llama.cpp build (or an upstream build with PTQ1_0/PQ2_0 support); stock llama.cpp may reject it as an unsupported type.`
+      );
     }
 
     if (input.unified) {

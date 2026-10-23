@@ -14,7 +14,7 @@ Always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses 
 
 ### [LlamaTune](LlamaTune/index.html)
 
-Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use, reads model metadata directly from local GGUF files, supports separate K/V cache quantization, and saves presets as bash scripts.
+Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use, reads model metadata directly from local GGUF files, supports separate K/V cache quantization and PrismML `PTQ1_0`/`PQ2_0` ternary schemes, and saves presets as bash scripts.
 
 ## Shared
 

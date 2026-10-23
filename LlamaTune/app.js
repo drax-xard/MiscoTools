@@ -12,6 +12,7 @@
     lastWarnings: 0,
     copyTimer: null,
     saveTimer: null,
+    ggufLoadToken: 0,
   };
 
   const STRATEGY_COPY = {
@@ -183,6 +184,10 @@
     return Array.from(els.archProfile.options).some((option) => option.value === value);
   }
 
+  function hasQuantOption(value) {
+    return Array.from(els.quant.options).some((option) => option.value === value);
+  }
+
   function applyGgufInfo(info, fileName) {
     if (info.modelName) {
       els.modelName.value = info.modelName;
@@ -198,7 +203,7 @@
       els.nativeContext.value = String(Math.round(info.contextLength));
     }
 
-    if (info.quantKey && Optimizer.QUANTS[info.quantKey]) {
+    if (info.quantKey && Optimizer.QUANTS[info.quantKey] && hasQuantOption(info.quantKey)) {
       els.quant.value = info.quantKey;
     }
 
@@ -233,16 +238,23 @@
     const file = els.ggufFile.files && els.ggufFile.files[0];
     if (!file) return;
 
+    const token = ++state.ggufLoadToken;
     setGgufStatus(`Reading ${file.name}…`);
     try {
       const slice = file.slice(0, Math.min(file.size, GGUF_READ_LIMIT));
       const buffer = await slice.arrayBuffer();
+      if (token !== state.ggufLoadToken) return;
       const info = Optimizer.parseGGUF(new Uint8Array(buffer));
       applyGgufInfo(info, file.name);
     } catch (error) {
+      if (token !== state.ggufLoadToken) return;
       const suffix =
         file.size > GGUF_READ_LIMIT ? ` Only the first ${GGUF_READ_LIMIT / (1024 * 1024)} MiB were read.` : "";
       setGgufStatus(`${error.message}${suffix}`, "is-error");
+    } finally {
+      if (token === state.ggufLoadToken) {
+        els.ggufFile.value = "";
+      }
     }
   }
 
@@ -475,6 +487,8 @@
     els.vramFree.textContent = "—";
     els.ramUsed.textContent = "—";
     els.ramFree.textContent = "—";
+    els.vramFree.classList.remove("is-over");
+    els.ramFree.classList.remove("is-over");
     [els.vramBar, els.ramBar].forEach((bar) => {
       Array.from(bar.children).forEach((segment) => {
         segment.style.width = "0%";
@@ -490,6 +504,7 @@
     els.warningList.innerHTML = `<li>${escapeHtml(error.message)}</li>`;
     els.showWarnings.textContent = "1 issue";
     els.showWarnings.classList.add("has-warnings");
+    els.showWarnings.title = "Jump to warnings";
   }
 
   function recalculate() {
@@ -636,7 +651,6 @@
   function init() {
     bindEvents();
     els.strategyCopy.textContent = STRATEGY_COPY[state.strategy];
-    updateArchitectureSummary();
     recalculate();
   }
 

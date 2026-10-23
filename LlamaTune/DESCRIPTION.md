@@ -70,6 +70,11 @@ These are estimates, not benchmarks. Real usage varies with the llama.cpp build,
 attention implementation, graph allocation, and the exact GGUF file. Leave headroom, and if
 you hit an out-of-memory error, lower `--ctx-size` first before changing anything else.
 
+`PTQ1_0` and `PQ2_0` are PrismML group-128 ternary packings (GGML tensor types 143 and 142).
+They need a PrismML llama.cpp build or an upstream build with those types; stock llama.cpp
+may reject them as unsupported. `PQ2_0` is usually faster at prompt processing, while
+`PTQ1_0` is smaller and can decode faster when memory bandwidth is the bottleneck.
+
 ## Files
 
 | File | Purpose |

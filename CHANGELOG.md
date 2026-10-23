@@ -11,6 +11,9 @@ Versions are project-wide: a release covers every tool in the collection.
 
 ### Added
 
+- **LlamaTune** — PrismML ternary quantization options (`PTQ1_0` and `PQ2_0`) in the
+  picker, weight estimates, GGUF auto-detection (tensor types 142/143 and file types
+  141/143), generated model filenames, and a PrismML runtime warning.
 - **B-BOT Advanced** backend foundation:
   - FastAPI service with a public `/health` endpoint and configurable
     `config.yaml` / `.env` loading.
@@ -24,6 +27,12 @@ Versions are project-wide: a release covers every tool in the collection.
   - Architecture, plugin API, voice, deployment, and discovery documentation.
   - Pytest suite covering health, auth, conversation CRUD, streaming, export, and
     settings.
+
+### Fixed
+
+- **LlamaTune** — the quantization picker now includes every scheme the optimizer
+  supports (`IQ2_S`, `IQ2_M`, `IQ3_M`, `F32`), GGUF auto-detection recognizes F32
+  files, and rapid or repeated GGUF selections no longer apply stale data.
 
 ### Changed
 
