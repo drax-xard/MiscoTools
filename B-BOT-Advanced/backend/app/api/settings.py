@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from app.api.schemas import SettingsOut
@@ -34,10 +34,16 @@ def read_settings(
 @router.put("/system-prompt", response_model=SettingsOut)
 def update_system_prompt(
     payload: SystemPromptUpdate,
+    request: Request,
     config: AppConfig = Depends(get_config),
     db: Database = Depends(get_db),
 ) -> SettingsOut:
     db.set_setting("system_prompt", payload.system_prompt.strip())
+    db.audit(
+        "settings.system_prompt.update",
+        f"length={len(payload.system_prompt.strip())}",
+        actor=getattr(request.state, "actor", "household"),
+    )
     settings = config.redacted()
     settings["system_prompt"] = db.get_setting("system_prompt") or ""
     return SettingsOut(settings=settings)

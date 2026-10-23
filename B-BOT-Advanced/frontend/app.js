@@ -1,5 +1,7 @@
+const TOKEN_KEY = "bbot-advanced-token";
+
 const state = {
-  token: localStorage.getItem("bbot-advanced-token") || "",
+  token: sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || "",
   conversationId: null,
   controller: null,
   streaming: false,
@@ -7,6 +9,7 @@ const state = {
 
 const el = {
   token: document.getElementById("token"),
+  remember: document.getElementById("remember-token"),
   saveToken: document.getElementById("save-token"),
   statusDot: document.getElementById("status-dot"),
   conversations: document.getElementById("conversations"),
@@ -21,6 +24,7 @@ const el = {
 };
 
 el.token.value = state.token;
+el.remember.checked = Boolean(localStorage.getItem(TOKEN_KEY));
 
 function showError(message) {
   el.error.textContent = message;
@@ -252,7 +256,13 @@ async function exportConversation(event) {
 
 el.saveToken.addEventListener("click", async () => {
   state.token = el.token.value.trim();
-  localStorage.setItem("bbot-advanced-token", state.token);
+  if (el.remember.checked) {
+    localStorage.setItem(TOKEN_KEY, state.token);
+    sessionStorage.removeItem(TOKEN_KEY);
+  } else {
+    sessionStorage.setItem(TOKEN_KEY, state.token);
+    localStorage.removeItem(TOKEN_KEY);
+  }
   await loadConversations();
   showError("");
 });

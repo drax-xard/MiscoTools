@@ -45,6 +45,8 @@ body {
 .dot.offline { background: var(--danger); }
 
 .actions { display: flex; align-items: center; gap: 8px; }
+.remember { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+.remember input { padding: 0; }
 
 input, textarea, button, .button {
   font: inherit;

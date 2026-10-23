@@ -9,19 +9,20 @@ description = "B-BOT Advanced - always-on, bilingual home and work assistant"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "fastapi>=0.110",
-    "uvicorn[standard]>=0.29",
-    "httpx>=0.27",
-    "pydantic>=2.6",
-    "PyYAML>=6.0",
-    "python-dotenv>=1.0",
+    "fastapi==0.128.8",
+    "uvicorn[standard]==0.39.0",
+    "httpx==0.28.1",
+    "pydantic==2.13.5",
+    "PyYAML==6.0.3",
+    "python-dotenv==1.2.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
-    "pytest-asyncio>=0.23",
-    "ruff>=0.3",
+    "pytest==8.4.2",
+    "pytest-asyncio==1.2.0",
+    "ruff==0.17.2",
+    "pip-audit>=2.7",
 ]
 
 [project.scripts]

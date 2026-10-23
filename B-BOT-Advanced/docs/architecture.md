@@ -23,7 +23,7 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 | Storage (`core/database.py`) | SQLite schema, WAL, FTS5, audit log | Implemented |
 | LLM (`core/llm.py`) | OpenAI-compatible streaming client | Implemented |
 | Chat API (`api/chat.py`) | Conversations, SSE streaming, export | Implemented |
-| Settings API (`api/settings.py`) | Redacted config, system prompt | Implemented |
+| Settings API (`api/settings.py`) | User-facing settings, system prompt | Implemented |
 | Router (`core/router.py`) | Deterministic parsing + LLM tool calls | Planned |
 | Scheduler (`core/scheduler.py`) | APScheduler reminders and chores | Planned |
 | Event bus (`core/events.py`) | Sensor/device/voice events | Planned |
@@ -36,11 +36,12 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 
 1. The client sends `POST /api/chat/conversations/{id}/messages` with a bearer token.
 2. The user message is persisted and the conversation title is derived from the first message.
-3. History plus the system prompt is sent to the configured `/chat/completions` endpoint.
+3. History plus the system prompt is sent to the configured `/chat/completions` endpoint;
+   older turns are trimmed to the configured message/character budget.
 4. The reply streams back as SSE `delta` events; the complete text is persisted and emitted
-   as a `done` event.
-5. Errors are emitted as an `error` event without terminating the server; partial replies are
-   saved when possible.
+   as a `done` event. Streamed bytes and concurrent streams are capped.
+5. Errors are emitted as a generic `error` event with a server-side correlation ID; partial
+   replies are saved when possible.
 
 ## Portability rules
 

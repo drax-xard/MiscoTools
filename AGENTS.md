@@ -68,7 +68,7 @@ cd backend && ruff check . --fix
 ## Environment
 
 - Copy `.env.example` → `.env` and fill values. `.env` overrides `config.yaml`.
-- Key env vars: `B_BOT_AUTH_TOKEN`, `B_BOT_HOST`, `B_BOT_PORT`, `B_BOT_LLM_BASE_URL`, `B_BOT_LLM_MODEL`, `B_BOT_LLM_API_KEY`, `B_BOT_STT_BASE_URL`, `B_BOT_STT_MODEL`, `B_BOT_DATABASE_PATH`
+- Key env vars: `B_BOT_AUTH_TOKEN`, `B_BOT_AUTH_TOKEN_PREVIOUS`, `B_BOT_HOST`, `B_BOT_PORT`, `B_BOT_LLM_BASE_URL`, `B_BOT_LLM_MODEL`, `B_BOT_LLM_API_KEY`, `B_BOT_STT_BASE_URL`, `B_BOT_STT_MODEL`, `B_BOT_DATABASE_PATH`, `B_BOT_DOCS_ENABLED`, `B_BOT_ALLOW_INSECURE_TRANSPORT`, `B_BOT_RATE_LIMIT_PER_MINUTE`, `B_BOT_RETENTION_DAYS`
 - If `B_BOT_AUTH_TOKEN` is empty, the server returns 503 on all authenticated routes
 
 ## LLM Efficiency Directives

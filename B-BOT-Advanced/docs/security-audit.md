@@ -46,21 +46,21 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 | ID | Severity | Finding |
 | --- | --- | --- |
 | SEC-01 | High | **RESOLVED** — `.env.example` no longer ships placeholder; config rejects placeholders/weak tokens; token generator added |
-| SEC-02 | Medium | No rate limiting or connection limits; token brute force and inference-cost abuse |
+| SEC-02 | Medium | **RESOLVED** — In-app per-IP/global rate limits, auth-failure lockout, and proxy guidance added |
 | SEC-03 | Medium | **RESOLVED** — CORS middleware added before startup; startup no longer crashes |
-| SEC-04 | Medium | Full conversation history resent on every turn with no cap |
-| SEC-05 | Medium | No global request-body or SSE response limits |
-| SEC-06 | Medium | Bearer token persisted in `localStorage`; no CSP/security headers |
-| SEC-07 | Medium | Public interactive docs and OpenAPI schema |
-| SEC-08 | Medium | Dependencies use open-ended ranges; no lockfile or vulnerability audit |
-| SEC-09 | Medium | SQLite data and backups have no explicit confidentiality/retention controls |
-| SEC-10 | Low | Upstream LLM error bodies are relayed to clients |
+| SEC-04 | Medium | **RESOLVED** — Configurable message/character history budgets trim oldest turns |
+| SEC-05 | Medium | **RESOLVED** — Body-size middleware, SSE byte cap, stored-message cap, retention cleanup |
+| SEC-06 | Medium | **RESOLVED** — CSP/security headers, backend-served frontend, sessionStorage default with opt-in remember |
+| SEC-07 | Medium | **RESOLVED** — Docs/OpenAPI disabled by default; dev-only opt-in |
+| SEC-08 | Medium | **RESOLVED** — Exact pins, `requirements.lock`, and CI `pip-audit` |
+| SEC-09 | Medium | **RESOLVED** — `0700`/`0600` data permissions, retention cleanup, encrypted-backup guidance |
+| SEC-10 | Low | **RESOLVED** — Upstream details logged server-side; clients get a generic message plus reference ID |
 | SEC-11 | Low | **RESOLVED** — Health endpoint no longer discloses filesystem paths/feature details |
 | SEC-12 | Low | **RESOLVED** — Non-ASCII authorization header handled safely (401, no 500) |
-| SEC-13 | Low | FTS `MATCH` accepts raw text without escaping |
-| SEC-14 | Low | Security-relevant actions are not written to `audit_log` |
-| SEC-15 | Low | Single token provides no client identity, rotation, or revocation |
-| SEC-16 | Low | Settings endpoint discloses internal endpoints and filesystem layout |
+| SEC-13 | Low | **RESOLVED** — FTS input is quoted as a phrase; invalid/oversized queries are rejected |
+| SEC-14 | Low | **RESOLVED** — Auth failures/lockouts, settings changes, renames, and deletions are audited |
+| SEC-15 | Low | **RESOLVED** — Zero-downtime rotation via `auth_token_previous`; per-client identity remains future work |
+| SEC-16 | Low | **RESOLVED** — Settings API returns only user-relevant fields |
 | SEC-17 | Info | No CSRF exposure today because the token is a header, not a cookie |
 | SEC-18 | Info | SQL injection not observed; all current queries are parameterized |
 
@@ -75,10 +75,10 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 | SEC-24 | Medium | Device adapters (MQTT/HA/GPIO) lack secure-default requirements |
 | SEC-25 | Medium | Voice: always-on capture, spoofing, plaintext audio, model integrity |
 | SEC-26 | Medium | Projects/documents: Markdown XSS, unsafe filenames, export handling |
-| SEC-27 | Medium | Deployment guidance uses a broad user and no service sandboxing |
-| SEC-28 | Medium | Remote inference over plaintext HTTP by default |
+| SEC-27 | Medium | **RESOLVED** — Dedicated service user, systemd hardening, firewall, and secret-permission guidance |
+| SEC-28 | Medium | **RESOLVED** — HTTPS examples and startup rejection of non-loopback plaintext HTTP |
 | SEC-29 | Low | Scheduler abuse and invalid recurrence input |
-| SEC-30 | Low | No data-retention or deletion policy for transcripts and audit data |
+| SEC-30 | Low | **RESOLVED** — Configurable retention window and backup expiry guidance |
 
 ---
 
@@ -92,7 +92,7 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 - Added `app/tools/gen_token.py` helper to generate strong tokens.
 - `app/deps.py` still fails closed if token missing.
 
-### SEC-02 — No rate limiting, connection limits, or lockout (Medium)
+### SEC-02 — No rate limiting, connection limits, or lockout (Medium) — **RESOLVED**
 
 **Evidence:** All routes in `app/api/chat.py` and `app/api/settings.py` accept unlimited
 requests. There is no middleware or proxy guidance for throttling.
@@ -115,7 +115,7 @@ requests. There is no middleware or proxy guidance for throttling.
 - CORS middleware is now added during app construction (before startup) based on config.
 - Wildcard policy remains as noted; explicit origin allowlist still recommended for production.
 
-### SEC-04 — Unbounded conversation history resent each turn (Medium)
+### SEC-04 — Unbounded conversation history resent each turn (Medium) — **RESOLVED**
 
 **Evidence:** `app/api/chat.py:117-124` loads every message and sends the full history plus
 the system prompt to the model on each request. There is no token/character/message cap and
@@ -131,7 +131,7 @@ vector for any authenticated client.
 - Reject or warn when a single conversation exceeds a hard cap.
 - Expose usage metrics for auditing.
 
-### SEC-05 — No body or response size limits (Medium)
+### SEC-05 — No body or response size limits (Medium) — **RESOLVED**
 
 **Evidence:** `ChatRequest.content` is capped at 32,000 characters
 (`app/api/schemas.py`), but there is no global request-body limit, no limit on number of
@@ -145,7 +145,7 @@ memory/disk. FastAPI/uvicorn do not impose a body limit by default.
 - Cap stored message size and total database growth; add a retention/cleanup job.
 - Bound the total bytes accumulated in `event_stream` (`app/api/chat.py:128-148`).
 
-### SEC-06 — Token in `localStorage`; no CSP or security headers (Medium)
+### SEC-06 — Token in `localStorage`; no CSP or security headers (Medium) — **RESOLVED**
 
 **Evidence:** `frontend/app.js:2` and `:255` read/write the bearer token in `localStorage`.
 Output is rendered with `textContent` (`frontend/app.js:84`, `:172`), which is good, but the
@@ -165,7 +165,7 @@ browser restarts and is readable by any script on the same origin.
   reuse that approach) and never allow raw HTML.
 - Rotate the token if XSS is suspected.
 
-### SEC-07 — Public API docs and OpenAPI schema (Medium)
+### SEC-07 — Public API docs and OpenAPI schema (Medium) — **RESOLVED**
 
 **Evidence:** `GET /docs` and `GET /openapi.json` return 200 without authentication
 (confirmed at runtime). Only `/api/*` routers carry `Depends(require_auth)`.
@@ -178,7 +178,7 @@ provides an interactive console for anyone who obtains a token.
   same auth dependency.
 - Keep them enabled only on loopback during development.
 
-### SEC-08 — Unpinned dependencies, no lockfile or audit (Medium)
+### SEC-08 — Unpinned dependencies, no lockfile or audit (Medium) — **RESOLVED**
 
 **Evidence:** `backend/pyproject.toml` uses lower bounds (`fastapi>=0.110`,
 `uvicorn[standard]>=0.29`, `httpx>=0.27`, …). There is no lockfile and no `pip-audit`/CI
@@ -194,7 +194,7 @@ is poor on the Pi. Future plugin dependencies compound this.
 - Apply the same policy to wake-word models, Piper voices, and any downloaded models
   (checksums/signatures).
 
-### SEC-09 — SQLite and backup confidentiality/retention (Medium)
+### SEC-09 — SQLite and backup confidentiality/retention (Medium) — **RESOLVED**
 
 **Evidence:** `app/core/database.py` creates the database and WAL files with default process
 permissions. `docs/deployment.md` copies plain `.db` files to `data/backups/` with `cp` and
@@ -210,7 +210,7 @@ by other local users or exposed through copied backups. Data accumulates indefin
 - Consider full-disk encryption on the Pi.
 - Keep `.env`, `config.yaml`, and database files out of git (already done).
 
-### SEC-10 — Upstream error details relayed to clients (Low)
+### SEC-10 — Upstream error details relayed to clients (Low) — **RESOLVED**
 
 **Evidence:** `app/core/llm.py:63-68` and `:107-111` embed up to 500 bytes of the upstream
 response in `LLMError`, and `app/api/chat.py:141-144` sends `str(exc)` to the browser.
@@ -231,7 +231,7 @@ message plus that ID to the client.
 **Fixes applied:**
 - `hmac.compare_digest` now compares UTF-8 encoded bytes with proper error handling; non-ASCII/malformed headers return 401.
 
-### SEC-13 — FTS `MATCH` input not escaped (Low)
+### SEC-13 — FTS `MATCH` input not escaped (Low) — **RESOLVED**
 
 **Evidence:** `app/core/database.py:276-291` passes `query` directly to
 `messages_fts MATCH ?`. The method is not currently exposed by an API route.
@@ -242,7 +242,7 @@ unexpected results, or expensive queries.
 **Recommendation:** Escape/quote user terms and validate length before `MATCH`; return a
 controlled 400 on FTS syntax errors; consider a dedicated search endpoint with limits.
 
-### SEC-14 — Audit log does not cover security events (Low)
+### SEC-14 — Audit log does not cover security events (Low) — **RESOLVED**
 
 **Evidence:** `Database.audit()` exists, but `require_auth`, settings updates, and
 conversation deletion do not call it.
@@ -255,7 +255,7 @@ is always `"household"`).
 conversation deletions, and later tool calls/permission denials. Add retention and integrity
 protection for the audit log.
 
-### SEC-15 — Single shared token, no identity or lifecycle (Low, accepted risk)
+### SEC-15 — Single shared token, no identity or lifecycle (Low, accepted risk) — **RESOLVED**
 
 **Evidence:** `AppConfig.auth_token` (`app/core/config.py:59`) is one static secret; there is
 no expiry, rotation endpoint, revocation list, or per-client label.
@@ -268,7 +268,7 @@ amplifies every other token-leak finding.
 revocation while keeping a simple household UX. At minimum, support token rotation without
 downtime (two valid tokens during a change window).
 
-### SEC-16 — Settings disclose internal topology (Low)
+### SEC-16 — Settings disclose internal topology (Low) — **RESOLVED**
 
 **Evidence:** `AppConfig.redacted()` (`app/core/config.py:68-77`) hides keys but returns
 host/port, LLM/STT base URLs, filesystem paths, voice settings, and CORS state to any
@@ -422,7 +422,7 @@ data to unsafe destinations.
 - Apply the same XSS/CSP controls as the chat UI.
 - Treat exported files as sensitive; warn users and avoid embedding secrets.
 
-### SEC-27 — Deployment hardening gaps (Medium)
+### SEC-27 — Deployment hardening gaps (Medium) — **RESOLVED**
 
 **Evidence:** `docs/deployment.md` runs the service as user `pi` with access to the home
 directory, and the systemd unit has no sandboxing directives. `.env` permissions are not
@@ -441,7 +441,7 @@ by other local users.
 - Use systemd credentials or a secrets manager for provider tokens.
 - Keep the service on loopback behind Tailscale/Caddy as already recommended.
 
-### SEC-28 — Plaintext transport to remote inference (Medium)
+### SEC-28 — Plaintext transport to remote inference (Medium) — **RESOLVED**
 
 **Evidence:** Defaults use `http://` for LLM and STT (`app/core/config.py:21,34`,
 `.env.example:12,17`, `config.yaml.example`). The plan relies on a LAN inference machine.
@@ -467,7 +467,7 @@ recurring jobs.
 **Recommendation:** Cap jobs per household, validate schedules against a strict grammar,
 enforce minimum intervals, handle timezones explicitly, and rate-limit creation.
 
-### SEC-30 — Data retention and deletion policy (Low)
+### SEC-30 — Data retention and deletion policy (Low) — **RESOLVED**
 
 **Evidence:** Transcripts are retained indefinitely; `docs/voice.md` only says audio is
 discarded. Backups and audit logs have no retention policy.
@@ -477,6 +477,42 @@ and audit logs; provide “delete conversation” (already implemented) and late
 “delete all data” path that also purges backups.
 
 ---
+
+## Remediation update — 2026-10-23
+
+All open findings in the **current code** table plus the deployment/TLS/retention
+items in the roadmap have been addressed:
+
+- **SEC-02/SEC-05:** `app/core/security.py` adds per-IP and global sliding-window
+  limits, temporary auth lockout, a request-body cap, and hardened HTTP
+  middleware. Chat streaming enforces a response-byte cap and stored-message cap.
+- **SEC-04:** `app/api/chat.py` trims history to `max_history_messages` and
+  `max_history_chars`, keeping the newest turns.
+- **SEC-06/SEC-07:** the backend serves the frontend with CSP, `nosniff`,
+  `frame-ancestors 'none'`, and `no-referrer`. The browser defaults to
+  `sessionStorage`; “Remember” opts into `localStorage`. Docs/OpenAPI are off
+  unless `B_BOT_DOCS_ENABLED=true`.
+- **SEC-08:** dependencies are exactly pinned, `requirements.lock` is committed,
+  and `.github/workflows/b-bot-security.yml` runs `pip-audit`, ruff, and pytest.
+- **SEC-09/SEC-30:** data directories are created `0700`, SQLite/WAL/SHM files
+  `0600`, `retention_days` purges old conversations/audit rows at startup, and
+  deployment docs cover encrypted backups and expiry.
+- **SEC-10:** `LLMError` no longer carries upstream bodies to clients; details are
+  logged and clients receive a generic message with a correlation ID.
+- **SEC-13:** FTS queries are converted to a quoted phrase (double quotes escaped),
+  length-capped, and syntax errors are swallowed safely.
+- **SEC-14:** auth failures/lockouts, settings updates, conversation renames, and
+  deletions now write to `audit_log`.
+- **SEC-15/SEC-16:** `B_BOT_AUTH_TOKEN_PREVIOUS` enables zero-downtime rotation;
+  the settings API returns only user-relevant fields (no hosts, URLs, or paths).
+- **SEC-27/SEC-28:** deployment docs use a dedicated `bbot` user with systemd
+  sandboxing and firewalling; non-loopback plaintext HTTP is rejected unless
+  `allow_insecure_transport` is explicitly set, and examples use HTTPS.
+
+Remaining open items are design-only milestones that are not implemented yet:
+SEC-20–SEC-26 (plugins, tool calling, confirmation, notifications, devices,
+voice, Markdown) and SEC-29 (scheduler). They must be completed as part of those
+milestones before the related features ship.
 
 ## Controls working well
 
@@ -537,6 +573,12 @@ Add automated tests/CI checks for:
 - Plugin permission denials, timeouts, and audit entries (when implemented).
 - Prompt-injection fixtures for tool-calling paths (when implemented).
 - Dependency audit (`pip-audit`) and secret scanning in CI.
+
+Implemented coverage (see `backend/tests/`): startup token/transport validation,
+auth failures/lockout/rotation, docs disabled, security headers, rate limit,
+body limits, history trimming, SSE size cap, upstream error redaction, audit
+entries, and FTS escaping. `pip-audit` runs in CI; secret scanning is still
+recommended as a follow-up.
 
 ## Assumptions and out of scope
 

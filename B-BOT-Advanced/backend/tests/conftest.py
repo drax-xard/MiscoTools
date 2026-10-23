@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from app.core.config import AppConfig, LLMConfig
 from app.main import create_app
 
-TOKEN = "test-token"
+TOKEN = "test-token-0123456789abcdef"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
 

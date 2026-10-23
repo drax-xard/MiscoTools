@@ -1,0 +1,44 @@
+name: b-bot-security
+
+on:
+  push:
+    paths:
+      - "B-BOT-Advanced/**"
+      - ".github/workflows/b-bot-security.yml"
+  pull_request:
+    paths:
+      - "B-BOT-Advanced/**"
+      - ".github/workflows/b-bot-security.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: B-BOT-Advanced/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: B-BOT-Advanced/backend/requirements.lock
+
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock
+          pip install pytest==8.4.2 pytest-asyncio==1.2.0 ruff==0.17.2 pip-audit
+          pip install -e . --no-deps
+
+      - name: Dependency vulnerability audit
+        run: pip-audit -r requirements.lock
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Tests
+        run: python -m pytest -q

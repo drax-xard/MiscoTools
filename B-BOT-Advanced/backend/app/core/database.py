@@ -7,9 +7,10 @@ and document text when the SQLite build supports it.
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
@@ -166,7 +167,7 @@ class Database:
 
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         connection = sqlite3.connect(str(self.path), timeout=30)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
@@ -188,6 +189,21 @@ class Database:
                 self.fts_enabled = True
             except sqlite3.OperationalError:
                 self.fts_enabled = False
+        self._secure_permissions()
+
+    def _secure_permissions(self) -> None:
+        """Restrict the data directory and SQLite files to the service user."""
+        for directory in {self.path.parent}:
+            try:
+                os.chmod(directory, 0o700)
+            except OSError:
+                pass
+        for candidate in (self.path, Path(f"{self.path}-wal"), Path(f"{self.path}-shm")):
+            try:
+                if candidate.exists():
+                    os.chmod(candidate, 0o600)
+            except OSError:
+                pass
 
     # Conversations -------------------------------------------------------
     def create_conversation(self, title: str = "New conversation") -> Dict[str, Any]:
@@ -273,20 +289,34 @@ class Database:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    @staticmethod
+    def _fts_phrase(query: str) -> Optional[str]:
+        cleaned = " ".join(query.split())
+        if not cleaned or len(cleaned) > 500:
+            return None
+        return '"' + cleaned.replace('"', '""') + '"'
+
     def search_messages(self, query: str, limit: int = 20) -> List[Dict[str, Any]]:
         if not self.fts_enabled:
             return []
-        with self.connect() as connection:
-            rows = connection.execute(
-                """
-                SELECT m.* FROM messages_fts f
-                JOIN messages m ON m.id = f.message_id
-                WHERE messages_fts MATCH ?
-                ORDER BY rank
-                LIMIT ?
-                """,
-                (query, limit),
-            ).fetchall()
+        phrase = self._fts_phrase(query)
+        if phrase is None:
+            return []
+        limit = max(1, min(int(limit), 100))
+        try:
+            with self.connect() as connection:
+                rows = connection.execute(
+                    """
+                    SELECT m.* FROM messages_fts f
+                    JOIN messages m ON m.id = f.message_id
+                    WHERE messages_fts MATCH ?
+                    ORDER BY rank
+                    LIMIT ?
+                    """,
+                    (phrase, limit),
+                ).fetchall()
+        except sqlite3.OperationalError:
+            return []
         return [dict(row) for row in rows]
 
     # Settings ------------------------------------------------------------
@@ -322,3 +352,29 @@ class Database:
                 """,
                 (actor, action, detail, _now()),
             )
+
+    # Retention -----------------------------------------------------------
+    def purge_expired(self, retention_days: int) -> Dict[str, int]:
+        """Delete conversations and audit rows older than the retention window."""
+        if retention_days <= 0:
+            return {"conversations": 0, "audit_log": 0}
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=retention_days)).isoformat()
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT id FROM conversations WHERE updated_at < ?", (cutoff,)
+            ).fetchall()
+            expired_ids = [int(row["id"]) for row in rows]
+            if expired_ids and self.fts_enabled:
+                placeholders = ",".join("?" for _ in expired_ids)
+                connection.execute(
+                    f"DELETE FROM messages_fts WHERE conversation_id IN ({placeholders})",
+                    expired_ids,
+                )
+            for conversation_id in expired_ids:
+                connection.execute(
+                    "DELETE FROM conversations WHERE id = ?", (conversation_id,)
+                )
+            audit_cursor = connection.execute(
+                "DELETE FROM audit_log WHERE created_at < ?", (cutoff,)
+            )
+        return {"conversations": len(expired_ids), "audit_log": audit_cursor.rowcount}

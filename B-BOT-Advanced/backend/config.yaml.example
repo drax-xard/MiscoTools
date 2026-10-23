@@ -5,10 +5,14 @@ port: 8000
 # Authentication: one household-wide bearer token.
 # Prefer setting B_BOT_AUTH_TOKEN in .env instead of writing it here.
 auth_token: ""
+# Optional token kept valid during a rotation window.
+# auth_token_previous: ""
 
 # OpenAI-compatible chat completion endpoint (inference machine).
+# HTTPS is required for non-loopback hosts. Set allow_insecure_transport only
+# when the inference machine is on a trusted, isolated network.
 llm:
-  base_url: "http://inference-machine:8080/v1"
+  base_url: "https://inference-machine/v1"
   model: ""
   api_key: ""
   temperature: 0.7
@@ -17,7 +21,7 @@ llm:
 
 # Remote Whisper endpoint (reserved for the voice milestone).
 stt:
-  base_url: "http://inference-machine:8080/v1"
+  base_url: "https://inference-machine/v1"
   model: "whisper-1"
   api_key: ""
   language: "auto"
@@ -38,3 +42,26 @@ voice:
 
 # LAN-only by default. Set to true only behind a trusted reverse proxy.
 allow_cors: false
+
+# Transport and exposure hardening.
+allow_insecure_transport: false
+trust_proxy_headers: false
+docs_enabled: false
+security_headers: true
+serve_frontend: true
+
+# Abuse controls (per client IP, per process).
+rate_limit_per_minute: 120
+global_rate_limit_per_minute: 600
+auth_max_failures: 5
+auth_lockout_seconds: 300
+max_request_body_bytes: 1000000
+max_response_bytes: 200000
+max_concurrent_streams: 4
+max_history_messages: 40
+max_history_chars: 24000
+max_message_chars: 32000
+max_stored_message_chars: 64000
+
+# Delete conversations/audit rows older than this many days (0 = keep forever).
+retention_days: 0

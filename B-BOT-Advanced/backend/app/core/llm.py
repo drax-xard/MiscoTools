@@ -3,15 +3,27 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any, AsyncIterator, Dict, List, Optional
 
 import httpx
 
 from app.core.config import LLMConfig
 
+logger = logging.getLogger(__name__)
+
 
 class LLMError(RuntimeError):
-    """Raised when the inference endpoint cannot satisfy a request."""
+    """Raised when the inference endpoint cannot satisfy a request.
+
+    Messages are safe to return to clients; internal details are logged only.
+    """
+
+
+class UpstreamLLMError(LLMError):
+    def __init__(self, status_code: int) -> None:
+        super().__init__(f"Inference endpoint returned HTTP {status_code}.")
+        self.status_code = status_code
 
 
 class LLMProvider:
@@ -62,10 +74,12 @@ class LLMProvider:
                 ) as response:
                     if response.status_code >= 400:
                         body = await response.aread()
-                        raise LLMError(
-                            f"Inference endpoint returned {response.status_code}: "
-                            f"{body.decode('utf-8', 'replace')[:500]}"
+                        logger.error(
+                            "Upstream inference error %s: %s",
+                            response.status_code,
+                            body.decode("utf-8", "replace")[:500],
                         )
+                        raise UpstreamLLMError(response.status_code)
                     async for line in response.aiter_lines():
                         if not line or not line.startswith("data:"):
                             continue
@@ -84,7 +98,8 @@ class LLMProvider:
                         if content:
                             yield content
         except httpx.HTTPError as exc:
-            raise LLMError(f"Could not reach inference endpoint: {exc}") from exc
+            logger.warning("Could not reach inference endpoint: %s", exc)
+            raise LLMError("Could not reach the inference endpoint.") from exc
 
     async def complete_chat(
         self,
@@ -103,7 +118,8 @@ class LLMProvider:
                     headers=self._headers(),
                 )
         except httpx.HTTPError as exc:
-            raise LLMError(f"Could not reach inference endpoint: {exc}") from exc
+            logger.warning("Could not reach inference endpoint: %s", exc)
+            raise LLMError("Could not reach the inference endpoint.") from exc
         if response.status_code >= 400:
             raise LLMError(
                 f"Inference endpoint returned {response.status_code}: "
