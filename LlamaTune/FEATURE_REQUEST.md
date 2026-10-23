@@ -8,6 +8,8 @@ The following features are requested:
 
 3) **Save presets**: Once the configuration is finalized, save the result as a bash script that executes the llama-server command with the selected parameters.
 
+4) **Add ternary quantization schemes**: Add `PTQ1_0` (dense base-3 trits, ~1.75 bpw, 5.95 GB for the 27B pack) and `PQ2_0` (each trit in a 2-bit slot, ~2.13 bpw, 7.21 GB for the 27B pack) to the quantization picker, memory estimate, GGUF auto-detection, and launch command.
+
 ---
 
 ## Implementation Plan for Requested Features - 22-OCT-2026
@@ -105,3 +107,77 @@ The project is a vanilla JavaScript/HTML tool that:
 - Feature 3: ~60-80 lines (download + optional load)
 
 **Total: ~450-600 lines of code**
+
+---
+
+## Implementation Plan for Ternary Quantization (PTQ1_0 / PQ2_0) - 23-OCT-2026
+
+### **Assessment**
+
+**Feasibility: high; low-risk, mostly metadata.** `LlamaTune` already derives weight size, validation, GGUF detection, and output filenames from the `QUANTS` table, so both schemes can be added without changing the memory or offload search logic.
+
+**Important distinction from `TQ1_0` / `TQ2_0`:** these are PrismML group-128 ternary types used by Ternary Bonsai 2, not the upstream llama.cpp ternary types:
+- `PTQ1_0` is GGML tensor type **143**: fp16 scale + dense base-3 trits, 28 bytes per 128 weights = **1.75 bpw**.
+- `PQ2_0` is GGML tensor type **142**: fp16 scale + one trit per 2-bit slot, 34 bytes per 128 weights = **2.125 bpw** (report as **2.13 bpw**).
+- Both store the same ternary weights. Quality is identical; the difference is file size, unpack cost, and backend/kernel support.
+- Do **not** alias them to `TQ1_0`/`TQ2_0`: the group size and tensor type IDs differ, and alias detection would misreport parameters and memory.
+
+**Runtime caveat:** stock llama.cpp may refuse these GGUFs as unknown tensor types. They currently require the PrismML llama.cpp fork (or a build containing the relevant upstream PR). The UI should surface this in the warnings list rather than silently producing a command that cannot load the model.
+
+**Memory check:** the request's 5.95 GB / 7.21 GB figures are decimal GB for the 27B pack. `LlamaTune` displays GiB, so expect about **5.54 GiB** and **6.71 GiB** of weights respectively (plus the existing 1% GGUF overhead and runtime reserve). These are consistent, not a calculation error.
+
+### **Implementation**
+
+1. **Add entries to `QUANTS` in `optimizer.js`**
+   ```javascript
+   PTQ1_0: { bpw: 1.75, label: "PTQ1_0", ternary: true, packing: "dense base-3", runtime: "prismml" },
+   PQ2_0: { bpw: 2.125, label: "PQ2_0", ternary: true, packing: "2-bit slots", runtime: "prismml" },
+   ```
+   The existing `estimateWeightsGiB()`, `validateInputs()`, `buildArgs()`, and filename generation then work automatically. Store the exact 2.125 bpw for calculation and display it as the requested **2.13 bpw** in the UI.
+
+2. **Add UI options in `index.html`**
+   - Add an optgroup above the existing low-bit group:
+     ```html
+     <optgroup label="Ternary · PrismML">
+       <option value="PTQ1_0">PTQ1_0 · 1.75 bpw · dense trits</option>
+       <option value="PQ2_0">PQ2_0 · 2.13 bpw · 2-bit slots</option>
+     </optgroup>
+     ```
+   - Keep `Q4_K_M` selected by default; do not make a fork-only format the default.
+
+3. **Teach the GGUF parser to recognize the types (`optimizer.js`)**
+   - Add to `GGML_TYPE_QUANTS`:
+     ```javascript
+     142: "PQ2_0",
+     143: "PTQ1_0",
+     ```
+   - Add the matching `general.file_type` values to `GGUF_FILE_TYPE_QUANTS` after verifying them against the published packs (reports indicate file types 141/143; tensor type 142/143 is the authoritative signal). The existing dominant-tensor-type fallback already handles files whose metadata does not map cleanly.
+
+4. **Add a runtime warning (`buildWarnings()` in `optimizer.js`)**
+   ```javascript
+   const quant = QUANTS[input.quantKey];
+   if (quant && quant.runtime === "prismml") {
+     warnings.push(
+       `${quant.label} uses PrismML ternary tensor types. Run the GGUF with a PrismML llama.cpp build (or an upstream build with PTQ1_0/PQ2_0 support); stock llama.cpp may reject it as an unsupported type.`
+     );
+   }
+   ```
+   Optionally add an insight explaining that `PQ2_0` usually has faster prompt processing while `PTQ1_0` is smaller and can decode faster when memory-bandwidth-bound.
+
+5. **No changes needed in `app.js`** for the core path: quantization reads from the select, the GGUF loader already applies any valid `QUANTS` key, and presets use `plan.quant.label`. Only add copy if the extra note is shown outside the warnings list.
+
+6. **Architecture note (follow-up):** Ternary Bonsai 2 uses hybrid attention and may not match the existing generic/Qwen KV profiles. If its real GGUF geometry differs, users should still override layers / KV heads / head dim in *Architecture estimate*. Adding a dedicated `bonsai` profile is a separate enhancement, not part of this quantization request.
+
+### **Verification**
+- `node --check LlamaTune/optimizer.js && node --check LlamaTune/app.js`
+- Node smoke test with `paramsB: 27`: confirm `PTQ1_0` estimates about 5.54 GiB / 5.95 GB of weights and `PQ2_0` about 6.71 GiB / 7.21 GB, and that the generated `--model` filename uses the selected label.
+- Load a real `Ternary-Bonsai-2-27B-*.gguf` and confirm the picker auto-selects `PTQ1_0` or `PQ2_0` from tensor type 143/142.
+- In the browser, select each scheme and confirm the command, preset comment, and PrismML runtime warning update correctly.
+
+### **Estimated Effort**
+- `optimizer.js` table + parser + warning: ~20-30 lines
+- `index.html` options: ~5 lines
+- Verification and copy: ~15 lines
+
+**Total: ~40-50 lines, one file pair, no new dependencies.**
+
