@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.chat import router as chat_router
 from app.api.chores import router as chores_router
+from app.api.dashboard import router as dashboard_router
 from app.api.members import router as members_router
 from app.api.notifications import router as notifications_router
 from app.api.plugins import router as plugins_router
@@ -138,6 +139,7 @@ def create_app(config: Optional[AppConfig] = None) -> FastAPI:
     app.include_router(settings_router)
     app.include_router(members_router)
     app.include_router(chores_router)
+    app.include_router(dashboard_router)
     app.include_router(reminders_router)
     app.include_router(notifications_router)
     app.include_router(plugins_router)

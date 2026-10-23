@@ -12,33 +12,213 @@
       <span class="dot" id="status-dot"></span>
       <h1>B-BOT <span>Advanced</span></h1>
     </div>
+
+    <nav class="tabs" aria-label="Views">
+      <button type="button" class="tab active" data-view="today" data-i18n="nav.today">Today</button>
+      <button type="button" class="tab" data-view="household" data-i18n="nav.household">Household</button>
+      <button type="button" class="tab" data-view="chores" data-i18n="nav.chores">Chores</button>
+      <button type="button" class="tab" data-view="reminders" data-i18n="nav.reminders">Reminders</button>
+      <button type="button" class="tab" data-view="notifications" data-i18n="nav.notifications">Notifications</button>
+      <button type="button" class="tab" data-view="chat" data-i18n="nav.chat">Chat</button>
+    </nav>
+
     <div class="actions">
-      <input id="token" type="password" placeholder="Household token" autocomplete="off">
-      <label class="remember"><input id="remember-token" type="checkbox"> Remember</label>
-      <button id="save-token" type="button">Save</button>
-      <a id="export" class="button" href="#" hidden>Export</a>
+      <button type="button" id="lang-toggle" class="ghost" aria-label="Language">ES</button>
+      <input id="token" type="password" placeholder="Household token" autocomplete="off" data-i18n-placeholder="auth.token">
+      <label class="remember"><input id="remember-token" type="checkbox"> <span data-i18n="auth.remember">Remember</span></label>
+      <button id="save-token" type="button" data-i18n="auth.save">Save</button>
+      <a id="export" class="button" href="#" hidden data-i18n="chat.export">Export</a>
     </div>
   </header>
 
-  <main class="layout">
-    <aside class="sidebar">
-      <button id="new-chat" class="primary" type="button">New chat</button>
-      <ul id="conversations" class="conversations"></ul>
-    </aside>
-
-    <section class="chat">
-      <div id="messages" class="messages">
-        <p class="empty">Start a conversation. Replies are streamed from the remote model.</p>
+  <main class="app">
+    <section id="view-today" class="view active" aria-labelledby="today-title">
+      <div class="view-head">
+        <div>
+          <h2 id="today-title" data-i18n="today.title">Today</h2>
+          <p id="today-subtitle" class="muted"></p>
+        </div>
+        <button type="button" class="ghost" id="refresh-today" data-i18n="common.refresh">Refresh</button>
       </div>
-      <form id="composer" class="composer">
-        <textarea id="input" rows="2" placeholder="Ask B-BOT..." required></textarea>
-        <button id="send" class="primary" type="submit">Send</button>
-        <button id="stop" type="button" hidden>Stop</button>
+      <div id="today-cards" class="cards"></div>
+      <div class="grid">
+        <section class="panel">
+          <h3 data-i18n="today.chores">Chores</h3>
+          <div id="today-chores" class="list"></div>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="today.reminders">Reminders</h3>
+          <div id="today-reminders" class="list"></div>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="today.inbox">Inbox</h3>
+          <div id="today-notifications" class="list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="view-household" class="view" aria-labelledby="household-title">
+      <div class="view-head">
+        <div>
+          <h2 id="household-title" data-i18n="household.title">Household</h2>
+          <p class="muted" data-i18n="household.subtitle">Profiles and chore points.</p>
+        </div>
+      </div>
+      <form id="member-form" class="form-row">
+        <label>
+          <span data-i18n="household.name">Name</span>
+          <input id="member-name" maxlength="80" required data-i18n-placeholder="household.namePlaceholder">
+        </label>
+        <button type="submit" class="primary" data-i18n="household.add">Add member</button>
       </form>
-      <p id="error" class="error" hidden></p>
+      <div id="members-list" class="list"></div>
+    </section>
+
+    <section id="view-chores" class="view" aria-labelledby="chores-title">
+      <div class="view-head">
+        <div>
+          <h2 id="chores-title" data-i18n="chores.title">Chores</h2>
+          <p class="muted" data-i18n="chores.subtitle">Recurring work, assignments, and points.</p>
+        </div>
+      </div>
+      <form id="chore-form" class="form-grid">
+        <label>
+          <span data-i18n="chore.title">Title</span>
+          <input id="chore-title" maxlength="200" required>
+        </label>
+        <label>
+          <span data-i18n="chore.cadence">Cadence</span>
+          <select id="chore-cadence">
+            <option value="daily" data-i18n="cadence.daily">Daily</option>
+            <option value="weekly" data-i18n="cadence.weekly">Weekly</option>
+            <option value="biweekly" data-i18n="cadence.biweekly">Every two weeks</option>
+            <option value="monthly" data-i18n="cadence.monthly">Monthly</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="chore.member">Assigned to</span>
+          <select id="chore-member"></select>
+        </label>
+        <label>
+          <span data-i18n="chore.points">Points</span>
+          <input id="chore-points" type="number" min="0" max="1000" value="1">
+        </label>
+        <label>
+          <span data-i18n="chore.nextDue">Next due</span>
+          <input id="chore-due" type="datetime-local">
+        </label>
+        <button type="submit" class="primary" data-i18n="chores.add">Add chore</button>
+      </form>
+      <div id="chores-list" class="list"></div>
+    </section>
+
+    <section id="view-reminders" class="view" aria-labelledby="reminders-title">
+      <div class="view-head">
+        <div>
+          <h2 id="reminders-title" data-i18n="reminders.title">Reminders</h2>
+          <p class="muted" data-i18n="reminders.subtitle">One-off and recurring reminders.</p>
+        </div>
+      </div>
+      <form id="reminder-form" class="form-grid">
+        <label>
+          <span data-i18n="reminder.title">Title</span>
+          <input id="reminder-title" maxlength="200" required>
+        </label>
+        <label>
+          <span data-i18n="reminder.due">Due</span>
+          <input id="reminder-due" type="datetime-local" required>
+        </label>
+        <label>
+          <span data-i18n="reminder.recurrence">Repeat</span>
+          <select id="reminder-recurrence">
+            <option value="" data-i18n="recurrence.none">Does not repeat</option>
+            <option value="daily" data-i18n="recurrence.daily">Daily</option>
+            <option value="weekly" data-i18n="recurrence.weekly">Weekly</option>
+            <option value="biweekly" data-i18n="recurrence.biweekly">Every two weeks</option>
+            <option value="monthly" data-i18n="recurrence.monthly">Monthly</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="reminder.member">For</span>
+          <select id="reminder-member"></select>
+        </label>
+        <label class="wide">
+          <span data-i18n="reminder.description">Description</span>
+          <textarea id="reminder-description" rows="2" maxlength="4000"></textarea>
+        </label>
+        <button type="submit" class="primary" data-i18n="reminders.add">Add reminder</button>
+      </form>
+      <div id="reminders-list" class="list"></div>
+    </section>
+
+    <section id="view-notifications" class="view" aria-labelledby="notifications-title">
+      <div class="view-head">
+        <div>
+          <h2 id="notifications-title" data-i18n="notifications.title">Notifications</h2>
+          <p class="muted" data-i18n="notifications.subtitle">Channels, test sends, inbox, and delivery log.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <section class="panel">
+          <h3 data-i18n="notifications.channels">Channels</h3>
+          <div id="notification-channels" class="list"></div>
+        </section>
+        <section class="panel">
+          <h3 data-i18n="notifications.test">Send a test</h3>
+          <form id="notification-test-form" class="stack">
+            <label>
+              <span data-i18n="notifications.message">Message</span>
+              <textarea id="notification-message" rows="2" maxlength="4000" required></textarea>
+            </label>
+            <label>
+              <span data-i18n="notifications.target">Target</span>
+              <input id="notification-target" value="household" maxlength="80" required>
+            </label>
+            <fieldset class="checks">
+              <legend data-i18n="notifications.channels">Channels</legend>
+              <label><input id="notification-channel-web" type="checkbox" checked> <span data-i18n="notifications.web">Web</span></label>
+              <label><input id="notification-channel-voice" type="checkbox" checked> <span data-i18n="notifications.voice">Voice</span></label>
+            </fieldset>
+            <button type="submit" class="primary" data-i18n="notifications.send">Send test</button>
+          </form>
+        </section>
+      </div>
+      <section class="panel">
+        <div class="panel-head">
+          <h3 data-i18n="notifications.inbox">Inbox</h3>
+          <button type="button" id="mark-all-read" class="ghost" data-i18n="notifications.markAllRead">Mark all read</button>
+        </div>
+        <div id="notifications-list" class="list"></div>
+      </section>
+      <section class="panel">
+        <h3 data-i18n="notifications.log">Delivery log</h3>
+        <div id="notification-log" class="list"></div>
+      </section>
+    </section>
+
+    <section id="view-chat" class="view" aria-labelledby="chat-title">
+      <div class="chat-layout">
+        <aside class="sidebar">
+          <button id="new-chat" class="primary" type="button" data-i18n="chat.new">New chat</button>
+          <ul id="conversations" class="conversations"></ul>
+        </aside>
+        <section class="chat">
+          <h2 id="chat-title" class="sr-only" data-i18n="nav.chat">Chat</h2>
+          <div id="messages" class="messages">
+            <p class="empty" data-i18n="chat.empty">Start a conversation. Replies are streamed from the remote model.</p>
+          </div>
+          <form id="composer" class="composer">
+            <textarea id="input" rows="2" placeholder="Ask B-BOT..." required data-i18n-placeholder="chat.placeholder"></textarea>
+            <button id="send" class="primary" type="submit" data-i18n="chat.send">Send</button>
+            <button id="stop" type="button" hidden data-i18n="chat.stop">Stop</button>
+          </form>
+          <p id="error" class="error" hidden></p>
+        </section>
+      </div>
     </section>
   </main>
 
+  <div id="toast" class="toast" role="status" hidden></div>
   <script src="app.js"></script>
 </body>
 </html>

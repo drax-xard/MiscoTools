@@ -274,16 +274,16 @@ B-BOT-Advanced/
 - Add bearer-token authentication and LAN-only binding by default.
 - Acceptance: a conversation streams from the remote model, survives a restart, and can be exported.
 
-### 4. Plugins, reminders, chores, and notifications
+### 4. Plugins, reminders, chores, and notifications **Completed.**
 
-> Backend foundation and first-party plugin registry completed (members, chores,
-> reminders, scheduler, event bus, notification dispatcher, manifests, permissions,
-> tool audit). The Today/notification UI remains.
+> Backend, first-party plugin registry, and the Today/household/chore/reminder/
+> notification web UI are implemented. External notification providers remain in
+> Milestone 8; voice delivery remains in Milestone 5.
 
 - Implement the plugin loader, manifest validation, permissions, and audit log.
 - Add household member profiles, reminders, recurring chores, assignments, points, and completion history.
 - Implement the notification dispatcher with web and voice channels.
-- Acceptance: create, assign, complete, and score chores; trigger reminders across restarts; deliver a notification to web and voice.
+- Acceptance: create, assign, complete, and score chores; trigger reminders across restarts; deliver a notification to web and voice. **Met.**
 
 ### 5. Bilingual voice MVP
 

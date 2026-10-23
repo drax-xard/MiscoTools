@@ -211,3 +211,20 @@ class PluginToolResult(BaseModel):
     plugin_id: str
     tool: str
     result: Any
+
+
+class DashboardTodayOut(BaseModel):
+    date: str
+    timezone: str
+    generated_at: str
+    members: List[MemberOut]
+    overdue_chores: List[ChoreOut]
+    due_today_chores: List[ChoreOut]
+    upcoming_chores: List[ChoreOut]
+    overdue_reminders: List[ReminderOut]
+    due_today_reminders: List[ReminderOut]
+    upcoming_reminders: List[ReminderOut]
+    unread_notifications: List[NotificationOut]
+    unread_notification_count: int
+    chores_completed_today: int
+    points_earned_today: int

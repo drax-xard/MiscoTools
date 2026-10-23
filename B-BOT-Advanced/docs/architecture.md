@@ -31,6 +31,8 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 | Members API (`api/members.py`) | Household profiles and point totals | Implemented |
 | Chores API (`api/chores.py`) | Recurrence, assignment, completion, scoring | Implemented |
 | Reminders API (`api/reminders.py`) | One-off and recurring reminders | Implemented |
+| Dashboard API (`api/dashboard.py`) | Household-timezone Today aggregation and daily stats | Implemented |
+| Web UI (`frontend/`) | Today, household, chores, reminders, notifications, chat | Implemented |
 | Plugins (`plugins/`) | First-party manifest loader, capabilities, tools, audit | Implemented |
 | Voice (`voice/`) | Wake word, VAD, STT, TTS, state machine | Planned (Milestone 5) |
 | Devices (`devices/`) | LEDs, Home Assistant, MQTT, GPIO | Planned (Milestone 6) |
@@ -62,6 +64,19 @@ Smart LEDs / GPIO / optional HA ─────┘             │
    publishes a persisted `voice.notify` event and is marked `queued`; audio is
    produced by the Milestone 5 voice service.
 
+## Dashboard flow
+
+1. `GET /api/dashboard/today` computes the local day boundary from the configured
+   household timezone and classifies active chores and open reminders as overdue,
+   due today, or upcoming.
+2. The response also includes active members, unread notifications, the daily
+   completion count, and points awarded today.
+3. The static web client renders every value with `textContent`/`Option` nodes; it
+   never assigns `innerHTML` or renders model/user text as HTML. The existing CSP
+   continues to allow only same-origin scripts and styles.
+4. The dashboard is polled on view changes and after mutations. A dedicated SSE
+   notification stream remains deferred.
+
 ## Plugin flow
 
 1. The registry scans the repository-managed `plugins/` directory and validates each
@@ -87,7 +102,7 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 ## Data model
 
 `conversations`, `messages`, `members`, `tasks`, `chores`, `chore_completions`,
-`projects`, `documents`, `notification_channels`, `notification_log`, `plugins`,
+`projects`, `documents`, `notification_channels`, `notifications`, `notification_log`, `plugins`,
 `plugin_config`, `events`, `audit_log`, `settings`.
 
 Defaults: single household, one shared token, Markdown project files, SQLite WAL,
@@ -104,5 +119,8 @@ daily backups, structured memory first (vector search later).
 - **First-party plugins only for now.** In-process permission checks are not a
   security boundary; subprocess isolation is designed but deferred. See
   `docs/security-decisions.md`.
-- **Web notifications are polled first.** A dedicated SSE notification stream is
-  deferred until the dashboard needs it.
+- **Web notifications are polled first.** The dashboard and inbox poll the API; a
+  dedicated SSE notification stream remains deferred.
+- **Plain-text dashboard rendering.** User, model, chore, reminder, and notification
+  content is inserted with DOM text nodes, not HTML. Markdown project views, when
+  added, require a sanitizer or a plain-text renderer (SEC-26).

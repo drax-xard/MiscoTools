@@ -74,7 +74,7 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 | SEC-23 | Medium | Notification adapters: secret handling, SSRF, templates, recipient abuse |
 | SEC-24 | Medium | Device adapters (MQTT/HA/GPIO) lack secure-default requirements |
 | SEC-25 | Medium | Voice: always-on capture, spoofing, plaintext audio, model integrity |
-| SEC-26 | Medium | Projects/documents: Markdown XSS, unsafe filenames, export handling |
+| SEC-26 | Medium | **PARTIALLY ADDRESSED** — dashboard and chat render plain text without HTML sinks; project Markdown viewer/export remains deferred |
 | SEC-27 | Medium | **RESOLVED** — Dedicated service user, systemd hardening, firewall, and secret-permission guidance |
 | SEC-28 | Medium | **RESOLVED** — HTTPS examples and startup rejection of non-loopback plaintext HTTP |
 | SEC-29 | Low | Scheduler abuse and invalid recurrence input |
@@ -517,8 +517,9 @@ and built-in notification channels are implemented.
 
 ## Milestone 4 update — 2026-10-23
 
-The security-first backend slice for reminders, chores, and notifications is
-implemented. Design decisions are recorded in `docs/security-decisions.md`.
+The security-first backend slice and web dashboard for reminders, chores, and
+notifications are implemented. Design decisions are recorded in
+`docs/security-decisions.md`.
 
 - **SEC-29 — RESOLVED for this implementation.** Cadences are strict
   (`daily`, `weekly`, `biweekly`, `monthly`, `every:N:days|weeks`), minimum
@@ -540,6 +541,10 @@ implemented. Design decisions are recorded in `docs/security-decisions.md`.
   confirmation protocol are not implemented. The chat path still does not call
   tools. Confirmation-required plugin tools are denied rather than accepting a
   boolean approval.
+- **SEC-26 — PARTIALLY ADDRESSED for the dashboard.** The web client renders all
+  dynamic content with DOM text nodes, avoids raw-HTML sinks, and relies on the
+  existing strict CSP. Chat remains plain text. Project Markdown viewing/export is
+  still deferred and must use a sanitizer or plain-text renderer.
 - **Dependency audit:** `pip-audit` reports eight advisories whose named fixed
   versions are unavailable or incompatible with the pinned FastAPI version. CI
   ignores those exact IDs with a dated rationale; this is a tracked risk, not a

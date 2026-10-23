@@ -740,6 +740,22 @@ class Database:
             rows = connection.execute(query, params).fetchall()
         return [dict(row) for row in rows]
 
+    def chore_completion_stats(self, start_iso: str, end_iso: str) -> Dict[str, int]:
+        with self.connect() as connection:
+            row = connection.execute(
+                """
+                SELECT COUNT(*) AS completions,
+                       COALESCE(SUM(points_awarded), 0) AS points
+                FROM chore_completions
+                WHERE completed_at >= ? AND completed_at < ?
+                """,
+                (start_iso, end_iso),
+            ).fetchone()
+        return {
+            "completions": int(row["completions"]),
+            "points": int(row["points"]),
+        }
+
     def pending_chores(self, limit: int = 500) -> List[Dict[str, Any]]:
         with self.connect() as connection:
             rows = connection.execute(
@@ -857,6 +873,13 @@ class Database:
                 query, (max(1, min(int(limit), 200)),)
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def count_unread_notifications(self) -> int:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT COUNT(*) AS total FROM notifications WHERE read_at IS NULL"
+            ).fetchone()
+        return int(row["total"])
 
     def mark_notification_read(self, notification_id: str) -> bool:
         with self.connect() as connection:

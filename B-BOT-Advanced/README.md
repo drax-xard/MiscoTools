@@ -8,9 +8,8 @@ See [PLAN.md](PLAN.md) for the full development plan and milestones.
 
 ## Status
 
-Milestones 2 (skeleton) and 3 (backend and chat MVP) are complete. Milestone 4
-(plugins, reminders, chores, notifications) has its security-first backend
-foundation implemented:
+Milestones 2 (skeleton), 3 (backend and chat MVP), and 4 (plugins, reminders,
+chores, notifications) are complete for the web/backend slice:
 
 - FastAPI service with a public `/health` endpoint.
 - Bearer-token authentication for every `/api` route, with failure lockout and
@@ -31,12 +30,15 @@ foundation implemented:
   loading, capability-scoped storage/notification contexts, strict tool argument
   validation, timeouts, and audited tool calls. Third-party installation stays
   disabled until subprocess isolation exists.
+- A Today dashboard aggregating due chores and reminders, unread notifications,
+  household points, and daily completion stats in the configured household timezone.
+- A dependency-free web client served by the backend with Today, household, chores,
+  reminders, notifications, and chat views. The UI supports minimal English/Spanish
+  copy and renders all dynamic content as plain text under the existing CSP.
 - Read-only settings plus an editable system prompt.
-- A dependency-free web chat client served by the backend with CSP and security
-  headers.
 
-The Today/notification web UI is the remaining Milestone 4 task. Voice, GPIO, and
-external notification providers remain planned.
+Voice, GPIO, and external notification providers remain planned for later
+milestones.
 
 ## Layout
 
@@ -46,7 +48,7 @@ backend/
     main.py            FastAPI app factory and lifespan
     deps.py            auth and storage dependencies
     core/              config, database, LLM, events, scheduler, recurrence
-    api/               chat, settings, members, chores, reminders, notifications
+    api/               chat, settings, dashboard, members, chores, reminders, notifications
     notifications/     channel contract, dispatcher, web/voice channels
     plugins/           manifest loader, registry, permissions, tool audit
     voice/             wake word, VAD, STT, TTS (planned)
@@ -54,7 +56,7 @@ backend/
   tests/               pytest suite
   config.yaml.example
   .env.example
-frontend/              static chat client
+frontend/              static web client (Today, household, chores, reminders, notifications, chat)
 docs/                  architecture, plugin API, voice, deployment, discovery
 scripts/               install, systemd, backup (planned)
 ```
@@ -75,8 +77,9 @@ cp config.yaml.example config.yaml   # optional; .env overrides it
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Open `http://127.0.0.1:8000/` for the chat UI (the backend serves it with security
-headers). API docs are disabled by default; set `B_BOT_DOCS_ENABLED=true` only on
+Open `http://127.0.0.1:8000/` for the web UI (the backend serves it with security
+headers). Use the language button in the header to switch between English and
+Spanish. API docs are disabled by default; set `B_BOT_DOCS_ENABLED=true` only on
 loopback during development.
 
 ## Configuration

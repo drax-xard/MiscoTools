@@ -1,8 +1,8 @@
 # Current Session — B-BOT Advanced Milestone 4
 
 **Started:** 2026-10-23
-**Scope:** Security-first backend slice of Milestone 4 (plugins, reminders, chores, notifications).
-**Status:** Phases 0–6 complete; verification/docs updated. Dashboard UI (7) is the next session.
+**Scope:** Milestone 4 backend and web UI (plugins, reminders, chores, notifications).
+**Status:** Phases 0–7 complete; verification/docs updated. Only the explicit commit step (8.5) remains.
 
 ## Confirmed decisions
 
@@ -73,17 +73,17 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[!]` blocked.
 - [x] 6.5 SEC-20 boundary: first-party only; subprocess isolation design
 - [x] 6.6 Tests
 
-### 7. Aggregation and UI (next session)
-- [ ] 7.1 `/api/dashboard/today`
-- [ ] 7.2 Today dashboard
-- [ ] 7.3 Household/chore/reminder views
-- [ ] 7.4 Notification configuration and test action
-- [ ] 7.5 Safe rendering and minimal EN/ES copy
+### 7. Aggregation and UI
+- [x] 7.1 `/api/dashboard/today`
+- [x] 7.2 Today dashboard
+- [x] 7.3 Household/chore/reminder views
+- [x] 7.4 Notification configuration and test action
+- [x] 7.5 Safe rendering and minimal EN/ES copy
 
 ### 8. Verification and documentation
-- [x] 8.1 Pytest (70 passed) and ruff clean; pip-audit reports advisories with no available fixed versions (see below)
-- [x] 8.2 Acceptance covered by tests: assign/complete/score chore, reminder restart, web+voice dispatch, plugin enable/tool audit
-- [x] 8.3 Update security-audit status for SEC-20/23/29
+- [x] 8.1 Pytest (74 passed) and ruff clean; pip-audit reports advisories with no available fixed versions (see below)
+- [x] 8.2 Acceptance covered by tests: assign/complete/score chore, reminder restart, web+voice dispatch, plugin enable/tool audit, dashboard aggregation
+- [x] 8.3 Update security-audit status for SEC-20/23/26/29
 - [x] 8.4 Update architecture, plugin-api, README, PLAN, CHANGELOG
 - [ ] 8.5 Commit only if explicitly requested
 
@@ -106,14 +106,19 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[!]` blocked.
   errors, capability-scoped context (storage/notify), lazy code loading, first-party
   registry, lifecycle hooks, tool timeouts, audit digests/denials, and plugin API.
 - Phase 6 verification: 70 tests passed, ruff clean; lazy code loading is covered by a side-effect test.
-- Security/decision docs updated with the subprocess isolation design; dashboard UI
-  remains next session.
+- Security/decision docs updated with the subprocess isolation design.
+- Phase 7 added: household-timezone `/api/dashboard/today`, expanded Today/household/
+  chore/reminder/notification/chat UI, notification channel toggles and test sends,
+  EN/ES copy, and plain-text rendering guarded by a frontend test.
+- Phase 7 verification: 74 tests passed, ruff clean, `node --check frontend/app.js` clean.
 
 ## Files added or changed
 
 - `backend/app/plugins/errors.py`, `manifest.py`, `context.py`, `registry.py`
-- `backend/app/api/plugins.py`
-- `backend/tests/test_plugins.py`
+- `backend/app/api/plugins.py`, `backend/app/api/dashboard.py`
+- `backend/tests/test_plugins.py`, `backend/tests/test_dashboard.py`,
+  `backend/tests/test_frontend.py`
+- `frontend/index.html`, `frontend/app.js`, `frontend/styles.css`
 - `backend/app/core/recurrence.py`, `events.py`, `scheduler.py`
 - `backend/app/notifications/base.py`, `channels.py`, `dispatcher.py`
 - `backend/app/api/members.py`, `chores.py`, `reminders.py`, `notifications.py`

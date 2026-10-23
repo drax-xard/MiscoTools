@@ -23,7 +23,6 @@ Versions are project-wide: a release covers every tool in the collection.
   - Conversation list, create, rename, delete, streamed chat replies over SSE, and
     Markdown export.
   - Read-only settings endpoint with redacted secrets and an editable system prompt.
-  - Dependency-free web chat client under `B-BOT-Advanced/frontend/`.
   - Household member profiles with point totals.
   - Recurring chores with assignment, completion history, and scoring.
   - One-off and recurring reminders backed by SQLite and rebuilt into APScheduler
@@ -34,13 +33,19 @@ Versions are project-wide: a release covers every tool in the collection.
   - First-party plugin registry with YAML manifest validation, disabled-by-default
     lazy loading, capability-scoped storage/notification contexts, strict tool
     argument validation, timeouts, and audited tool calls/denials.
+  - `/api/dashboard/today` aggregation for due chores/reminders, unread
+    notifications, household points, and daily completion stats in the configured
+    timezone.
+  - Expanded dependency-free web client with Today, household, chores, reminders,
+    notifications, and chat views; notification channel toggles and test sends;
+    minimal English/Spanish copy; and plain-text rendering under the strict CSP.
   - Strict recurrence parsing, household timezone support, schema migrations, and
     notification/member/chore/reminder APIs.
   - Architecture, plugin API, voice, deployment, discovery, and security-decision
     documentation.
   - Pytest suite covering health, auth, conversation CRUD, streaming, export,
     settings, recurrence, migrations, members, chores, reminders, scheduler
-    recovery, notifications, and plugins.
+    recovery, notifications, plugins, the Today dashboard, and frontend rendering.
 
 ### Fixed
 

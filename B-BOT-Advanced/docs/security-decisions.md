@@ -87,6 +87,18 @@ Until this exists, the in-process loader remains first-party-only.
 - A scheduler job is idempotent per occurrence. Overdue reminders within the grace
   window are delivered once; older ones are marked missed instead of causing a storm.
 
+## SEC-26 — Dashboard rendering
+
+- The dashboard renders all API, user, model, chore, reminder, and notification data
+  through DOM text nodes (`textContent`, `Option`). It does not use `innerHTML`,
+  `insertAdjacentHTML`, or `document.write`.
+- Chat remains plain text: model output and user messages are never interpreted as
+  HTML or Markdown.
+- The existing CSP stays strict (`script-src 'self'`, `style-src 'self'`, no inline
+  scripts or event handlers). The frontend does not require external assets.
+- `backend/tests/test_frontend.py` guards these rendering rules. Project Markdown
+  viewing/export remains deferred and must use a sanitizer or plain-text renderer.
+
 ## Voice channel semantics
 
 The voice channel publishes a persisted `voice.notify` event and records the delivery as
