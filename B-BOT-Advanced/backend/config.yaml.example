@@ -61,6 +61,13 @@ reminder_grace_seconds: 3600
 max_notifications_per_minute: 30
 max_notification_retries: 2
 
+# First-party plugin loading. The loader reads only this repository-managed
+# directory; there is no plugin upload API.
+plugins_path: "plugins"
+plugins_enabled: true
+plugin_tool_timeout_seconds: 10.0
+plugin_max_manifest_bytes: 262144
+
 # Abuse controls (per client IP, per process).
 rate_limit_per_minute: 120
 global_rate_limit_per_minute: 600

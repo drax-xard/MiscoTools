@@ -27,12 +27,16 @@ foundation implemented:
 - A notification dispatcher with isolated channels, retries, rate limiting,
   delivery logging, and built-in `web` and `voice` channels. The voice channel
   queues a `voice.notify` event for the Milestone 5 voice service.
+- A first-party plugin registry with manifest validation, disabled-by-default
+  loading, capability-scoped storage/notification contexts, strict tool argument
+  validation, timeouts, and audited tool calls. Third-party installation stays
+  disabled until subprocess isolation exists.
 - Read-only settings plus an editable system prompt.
 - A dependency-free web chat client served by the backend with CSP and security
   headers.
 
-The plugin loader and the Today/notification web UI are the next Milestone 4
-tasks. Voice, GPIO, and external notification providers remain planned.
+The Today/notification web UI is the remaining Milestone 4 task. Voice, GPIO, and
+external notification providers remain planned.
 
 ## Layout
 
@@ -44,7 +48,7 @@ backend/
     core/              config, database, LLM, events, scheduler, recurrence
     api/               chat, settings, members, chores, reminders, notifications
     notifications/     channel contract, dispatcher, web/voice channels
-    plugins/           loader, registry, permissions (planned)
+    plugins/           manifest loader, registry, permissions, tool audit
     voice/             wake word, VAD, STT, TTS (planned)
     devices/           LEDs, Home Assistant, MQTT, GPIO (planned)
   tests/               pytest suite

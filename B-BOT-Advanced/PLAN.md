@@ -276,9 +276,9 @@ B-BOT-Advanced/
 
 ### 4. Plugins, reminders, chores, and notifications
 
-> Backend foundation completed (members, chores, reminders, scheduler, event bus,
-> notification dispatcher). Plugin loader/permissions and the Today/notification UI
-> remain.
+> Backend foundation and first-party plugin registry completed (members, chores,
+> reminders, scheduler, event bus, notification dispatcher, manifests, permissions,
+> tool audit). The Today/notification UI remains.
 
 - Implement the plugin loader, manifest validation, permissions, and audit log.
 - Add household member profiles, reminders, recurring chores, assignments, points, and completion history.

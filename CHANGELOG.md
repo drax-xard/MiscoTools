@@ -31,13 +31,16 @@ Versions are project-wide: a release covers every tool in the collection.
   - Notification dispatcher with isolated web/voice channels, retries, rate
     limiting, delivery logging, and a `voice.notify` event for the future voice
     service.
+  - First-party plugin registry with YAML manifest validation, disabled-by-default
+    lazy loading, capability-scoped storage/notification contexts, strict tool
+    argument validation, timeouts, and audited tool calls/denials.
   - Strict recurrence parsing, household timezone support, schema migrations, and
     notification/member/chore/reminder APIs.
   - Architecture, plugin API, voice, deployment, discovery, and security-decision
     documentation.
   - Pytest suite covering health, auth, conversation CRUD, streaming, export,
     settings, recurrence, migrations, members, chores, reminders, scheduler
-    recovery, and notifications.
+    recovery, notifications, and plugins.
 
 ### Fixed
 

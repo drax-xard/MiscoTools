@@ -68,7 +68,7 @@ should be fixed before exposing the service beyond `127.0.0.1` or adding plugins
 
 | ID | Severity | Finding |
 | --- | --- | --- |
-| SEC-20 | High | In-process plugins cannot be constrained by declared permissions |
+| SEC-20 | High | **PARTIALLY ADDRESSED** — first-party-only loader, lazy code load, capability contexts, and audited tool boundary implemented; subprocess isolation still required before third-party plugins |
 | SEC-21 | High | LLM tool calling plus indirect prompt injection from notes/documents |
 | SEC-22 | Medium | “Sensitive action confirmation” is under-specified and replayable |
 | SEC-23 | Medium | Notification adapters: secret handling, SSRF, templates, recipient abuse |
@@ -509,10 +509,11 @@ items in the roadmap have been addressed:
   sandboxing and firewalling; non-loopback plaintext HTTP is rejected unless
   `allow_insecure_transport` is explicitly set, and examples use HTTPS.
 
-Remaining open items are design-only milestones that are not implemented yet:
-SEC-20–SEC-26 (plugins, tool calling, confirmation, notifications, devices,
-voice, Markdown) and SEC-29 (scheduler). They must be completed as part of those
-milestones before the related features ship.
+Remaining open items are the parts of later milestones that are not implemented
+yet: SEC-20 subprocess isolation (third-party plugins), SEC-21/SEC-22 tool calling
+and confirmation, SEC-23 external notification providers, SEC-24 devices, SEC-25
+voice, and SEC-26 Markdown. The first-party plugin registry, scheduler controls,
+and built-in notification channels are implemented.
 
 ## Milestone 4 update — 2026-10-23
 
@@ -529,13 +530,16 @@ implemented. Design decisions are recorded in `docs/security-decisions.md`.
   isolation, and delivery logging. External providers and user-supplied URLs
   are still deferred; when added they must follow the recorded secret,
   allowlist, and opt-in rules.
-- **SEC-20 — PARTIALLY ADDRESSED.** The design now mandates first-party-only
-  plugins and a capability-scoped context. Subprocess isolation is still
-  required before third-party plugin installation; the plugin loader is the
-  next implementation task.
+- **SEC-20 — PARTIALLY ADDRESSED.** The first-party-only registry now validates
+  manifests without importing code, imports entrypoints only on enable, grants
+  capability-scoped `storage`/`notify` contexts, validates tool arguments, enforces
+  timeouts, and audits calls/denials with argument digests. In-process execution is
+  still not a sandbox; the documented subprocess isolation design is required before
+  third-party plugins can be accepted.
 - **SEC-21/SEC-22 — DESIGN ONLY.** LLM tool calling and the single-use
   confirmation protocol are not implemented. The chat path still does not call
-  tools.
+  tools. Confirmation-required plugin tools are denied rather than accepting a
+  boolean approval.
 - **Dependency audit:** `pip-audit` reports eight advisories whose named fixed
   versions are unavailable or incompatible with the pinned FastAPI version. CI
   ignores those exact IDs with a dated rationale; this is a tracked risk, not a

@@ -31,7 +31,7 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 | Members API (`api/members.py`) | Household profiles and point totals | Implemented |
 | Chores API (`api/chores.py`) | Recurrence, assignment, completion, scoring | Implemented |
 | Reminders API (`api/reminders.py`) | One-off and recurring reminders | Implemented |
-| Plugins (`plugins/`) | Manifest, permissions, tools, audit | Planned (next session) |
+| Plugins (`plugins/`) | First-party manifest loader, capabilities, tools, audit | Implemented |
 | Voice (`voice/`) | Wake word, VAD, STT, TTS, state machine | Planned (Milestone 5) |
 | Devices (`devices/`) | LEDs, Home Assistant, MQTT, GPIO | Planned (Milestone 6) |
 | Notifications (`notifications/`) | Channel registry, dispatcher, web/voice channels | Implemented |
@@ -61,6 +61,21 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 5. The `web` channel is read by the browser inbox API. The `voice` channel
    publishes a persisted `voice.notify` event and is marked `queued`; audio is
    produced by the Milestone 5 voice service.
+
+## Plugin flow
+
+1. The registry scans the repository-managed `plugins/` directory and validates each
+   YAML manifest with Pydantic. Entrypoint code is not imported during the scan.
+2. Manifests are synchronised to the `plugins` table; new plugins start disabled.
+3. Enabling a plugin imports its entrypoint, resolves the declared tools and optional
+   lifecycle hooks, and builds a capability-scoped `PluginContext`.
+4. Tool calls validate arguments against the tool schema, check the manifest/tool
+   permissions, enforce a timeout, and audit the call, result, timeout, or denial.
+   Raw arguments are represented only by a SHA-256 digest in the audit log.
+5. `storage` and `notify` are the only implemented capabilities. Confirmation-required
+   tools stay denied until the single-use confirmation protocol lands.
+6. The loader is first-party only. Subprocess isolation is required before third-party
+   plugins can be accepted.
 
 ## Portability rules
 

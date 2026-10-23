@@ -977,6 +977,73 @@ class Database:
             rows = connection.execute(query, params).fetchall()
         return [dict(row) for row in rows]
 
+    # Plugins -------------------------------------------------------------
+    def sync_plugin(self, plugin_id: str, name: str, version: str) -> Dict[str, Any]:
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO plugins (id, name, version, enabled, config_json)
+                VALUES (?, ?, ?, 0, '{}')
+                ON CONFLICT(id) DO UPDATE SET
+                    name = excluded.name,
+                    version = excluded.version
+                """,
+                (plugin_id, name, version),
+            )
+            return self.get_plugin_row(plugin_id, connection=connection) or {}
+
+    def get_plugin_row(
+        self, plugin_id: str, connection: Optional[sqlite3.Connection] = None
+    ) -> Optional[Dict[str, Any]]:
+        if connection is None:
+            with self.connect() as connection:
+                return self.get_plugin_row(plugin_id, connection=connection)
+        row = connection.execute(
+            "SELECT * FROM plugins WHERE id = ?", (plugin_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def list_plugin_rows(self) -> List[Dict[str, Any]]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT * FROM plugins ORDER BY id ASC"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def set_plugin_enabled(self, plugin_id: str, enabled: bool) -> Optional[Dict[str, Any]]:
+        with self.connect() as connection:
+            connection.execute(
+                "UPDATE plugins SET enabled = ? WHERE id = ?",
+                (1 if enabled else 0, plugin_id),
+            )
+            return self.get_plugin_row(plugin_id, connection=connection)
+
+    def get_plugin_config_values(self, plugin_id: str) -> Dict[str, str]:
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT key, value FROM plugin_config WHERE plugin_id = ?",
+                (plugin_id,),
+            ).fetchall()
+        return {row["key"]: row["value"] for row in rows}
+
+    def set_plugin_config_value(self, plugin_id: str, key: str, value: str) -> None:
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO plugin_config (plugin_id, key, value)
+                VALUES (?, ?, ?)
+                ON CONFLICT(plugin_id, key) DO UPDATE SET value = excluded.value
+                """,
+                (plugin_id, key, value),
+            )
+
+    def delete_plugin_config_value(self, plugin_id: str, key: str) -> None:
+        with self.connect() as connection:
+            connection.execute(
+                "DELETE FROM plugin_config WHERE plugin_id = ? AND key = ?",
+                (plugin_id, key),
+            )
+
     # Audit ---------------------------------------------------------------
     def audit(self, action: str, detail: str = "", actor: str = "system") -> None:
         with self.connect() as connection:

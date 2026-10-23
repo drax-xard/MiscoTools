@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -182,3 +182,32 @@ class NotificationDeliveryOut(BaseModel):
     error: str
     created_at: str
     updated_at: str
+
+
+class PluginOut(BaseModel):
+    id: str
+    name: str
+    version: str
+    description: str
+    permissions: List[str]
+    tools: List[str]
+    first_party: bool
+    enabled: bool
+    loaded: bool
+    code_loaded: bool
+    error: str
+    persisted_enabled: bool
+
+
+class PluginUpdate(BaseModel):
+    enabled: bool
+
+
+class PluginToolInvoke(BaseModel):
+    arguments: Dict[str, Any] = Field(default_factory=dict)
+
+
+class PluginToolResult(BaseModel):
+    plugin_id: str
+    tool: str
+    result: Any

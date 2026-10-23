@@ -16,6 +16,7 @@ from app.api.chat import router as chat_router
 from app.api.chores import router as chores_router
 from app.api.members import router as members_router
 from app.api.notifications import router as notifications_router
+from app.api.plugins import router as plugins_router
 from app.api.reminders import router as reminders_router
 from app.api.settings import router as settings_router
 from app.core.config import BACKEND_DIR, AppConfig, load_config
@@ -31,6 +32,7 @@ from app.core.security import (
     SecurityHeadersMiddleware,
 )
 from app.notifications.dispatcher import NotificationDispatcher
+from app.plugins.registry import PluginRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -111,19 +113,24 @@ def create_app(config: Optional[AppConfig] = None) -> FastAPI:
             active_config_resolved, database, events, notifications
         )
 
+        plugins = PluginRegistry(active_config_resolved, database, notifications)
+
         app.state.db = database
         app.state.llm = LLMProvider(active_config_resolved.llm)
         app.state.events = events
         app.state.notifications = notifications
         app.state.scheduler = scheduler
+        app.state.plugins = plugins
         app.state.stream_semaphore = asyncio.Semaphore(
             active_config_resolved.max_concurrent_streams
         )
         scheduler.start()
+        await plugins.start()
         try:
             yield
         finally:
             scheduler.shutdown()
+            await plugins.shutdown()
 
     app.router.lifespan_context = lifespan
 
@@ -133,6 +140,7 @@ def create_app(config: Optional[AppConfig] = None) -> FastAPI:
     app.include_router(chores_router)
     app.include_router(reminders_router)
     app.include_router(notifications_router)
+    app.include_router(plugins_router)
 
     @app.get("/health", tags=["system"])
     def health() -> dict:

@@ -2,7 +2,7 @@
 
 **Started:** 2026-10-23
 **Scope:** Security-first backend slice of Milestone 4 (plugins, reminders, chores, notifications).
-**Status:** Phases 0–5 complete; verification/docs updated. Plugin loader (6) and dashboard UI (7) are the next session.
+**Status:** Phases 0–6 complete; verification/docs updated. Dashboard UI (7) is the next session.
 
 ## Confirmed decisions
 
@@ -65,13 +65,13 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[!]` blocked.
 - [x] 5.6 SEC-23 controls: target validation, retry caps, isolation, no user-supplied URLs
 - [x] 5.7 Tests: fan-out, failure isolation, retries, web/voice delivery
 
-### 6. Plugin foundation (next session)
-- [ ] 6.1 Manifest schema and validation
-- [ ] 6.2 Loader/registry, disabled by default, persisted enable state
-- [ ] 6.3 Capability-scoped context and permission checks
-- [ ] 6.4 Timeouts, isolated errors, tool-call/denial audit
-- [ ] 6.5 SEC-20 boundary: first-party only; subprocess isolation design
-- [ ] 6.6 Tests
+### 6. Plugin foundation
+- [x] 6.1 Manifest schema and validation
+- [x] 6.2 Loader/registry, disabled by default, persisted enable state
+- [x] 6.3 Capability-scoped context and permission checks
+- [x] 6.4 Timeouts, isolated errors, tool-call/denial audit
+- [x] 6.5 SEC-20 boundary: first-party only; subprocess isolation design
+- [x] 6.6 Tests
 
 ### 7. Aggregation and UI (next session)
 - [ ] 7.1 `/api/dashboard/today`
@@ -81,8 +81,8 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[!]` blocked.
 - [ ] 7.5 Safe rendering and minimal EN/ES copy
 
 ### 8. Verification and documentation
-- [x] 8.1 Pytest (61 passed) and ruff clean; pip-audit reports advisories with no available fixed versions (see below)
-- [x] 8.2 Acceptance covered by tests: assign/complete/score chore, reminder restart, web+voice dispatch
+- [x] 8.1 Pytest (70 passed) and ruff clean; pip-audit reports advisories with no available fixed versions (see below)
+- [x] 8.2 Acceptance covered by tests: assign/complete/score chore, reminder restart, web+voice dispatch, plugin enable/tool audit
 - [x] 8.3 Update security-audit status for SEC-20/23/29
 - [x] 8.4 Update architecture, plugin-api, README, PLAN, CHANGELOG
 - [ ] 8.5 Commit only if explicitly requested
@@ -102,10 +102,18 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[!]` blocked.
   index and FastAPI 0.128.8 does not support Starlette 1.x. CI now ignores those exact
   IDs with a dated rationale; remove the ignores when upstream constraints allow the
   fixed versions.
-- Security/decision docs updated; plugin loader and dashboard remain next session.
+- Phase 6 added: manifest models and strict JSON-schema argument validation, plugin
+  errors, capability-scoped context (storage/notify), lazy code loading, first-party
+  registry, lifecycle hooks, tool timeouts, audit digests/denials, and plugin API.
+- Phase 6 verification: 70 tests passed, ruff clean; lazy code loading is covered by a side-effect test.
+- Security/decision docs updated with the subprocess isolation design; dashboard UI
+  remains next session.
 
 ## Files added or changed
 
+- `backend/app/plugins/errors.py`, `manifest.py`, `context.py`, `registry.py`
+- `backend/app/api/plugins.py`
+- `backend/tests/test_plugins.py`
 - `backend/app/core/recurrence.py`, `events.py`, `scheduler.py`
 - `backend/app/notifications/base.py`, `channels.py`, `dispatcher.py`
 - `backend/app/api/members.py`, `chores.py`, `reminders.py`, `notifications.py`

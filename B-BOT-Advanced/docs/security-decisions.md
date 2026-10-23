@@ -7,16 +7,45 @@ notifications. This document records the controls that Milestone 4 code must fol
 ## SEC-20 — Plugin execution boundary
 
 - Milestone 4 ships **first-party plugins only**. Arbitrary plugin installation stays
-  disabled; the loader may only load manifests from the repository's built-in plugin
-  directory.
+  disabled; the loader reads only the repository-managed `plugins/` directory and there
+  is no upload/install API. Changing `plugins_path` is an admin-level configuration
+  action and does not create a sandbox.
+- Manifests are parsed without importing code. A plugin's entrypoint is imported only
+  when the plugin is explicitly enabled, so disabled plugins do not execute top-level
+  code at startup.
 - Permission checks are enforced at the tool-call boundary through a capability-scoped
   `PluginContext`. A plugin receives only the storage, notification, or event helpers
   granted by its manifest.
 - In-process permission checks are **not** a sandbox. Third-party plugins must not be
   accepted until a subprocess/container boundary with a dedicated OS user, restricted
   filesystem, network deny-by-default, and RPC-level permissions is implemented.
+- Confirmation-required tools are denied until the single-use confirmation protocol
+  exists; a boolean `confirmed` flag is not an acceptable approval mechanism.
 - Tool calls, arguments digests, results, timeouts, and permission denials are written
   to `audit_log`.
+
+### Deferred subprocess isolation design
+
+Third-party plugin support will use an out-of-process runner:
+
+- One runner process per plugin (or a small pooled worker) under a dedicated OS user
+  with no shell and no home directory.
+- The runner receives only the plugin directory (read-only) plus a dedicated storage
+  directory. It cannot read the household database, `.env`, token, or inference keys.
+- Network access is denied by default. A `network` permission would require an
+  explicit proxy/allowlist; `filesystem`, `gpio`, and `home` capabilities are brokered
+  by the core and never granted as raw host access.
+- Core-to-runner RPC over a Unix socket/pipe uses JSON messages with plugin id, tool
+  name, argument digest, request id, deadline, and a size-capped result. The runner
+  cannot call tools or capabilities that the core did not grant for that request.
+- The core enforces timeouts and kills/restarts the runner on deadline or crash.
+  Lifecycle setup/teardown also runs through the runner.
+- Notifications, events, and storage are proxied through the core broker; provider
+  secrets never enter the runner.
+- Manifests must be signed or checksum-pinned and manually reviewed. Plugin
+  dependencies are pinned and audited like core dependencies.
+
+Until this exists, the in-process loader remains first-party-only.
 
 ## SEC-21 — Tool calling and prompt injection
 

@@ -93,6 +93,12 @@ class AppConfig(BaseModel):
     max_notifications_per_minute: int = Field(default=30, ge=1)
     max_notification_retries: int = Field(default=2, ge=0, le=10)
 
+    # First-party plugin loading.
+    plugins_path: Path = Path("plugins")
+    plugins_enabled: bool = True
+    plugin_tool_timeout_seconds: float = Field(default=10.0, ge=0.1, le=300)
+    plugin_max_manifest_bytes: int = Field(default=262144, ge=1024)
+
     # Abuse resistance (SEC-02/SEC-05).
     rate_limit_per_minute: int = Field(default=120, ge=1)
     global_rate_limit_per_minute: int = Field(default=600, ge=1)
@@ -190,6 +196,10 @@ def _parse_int(value: str) -> int:
     return int(value)
 
 
+def _parse_float(value: str) -> float:
+    return float(value)
+
+
 def _set_path(data: Dict[str, Any], path: tuple, value: Any) -> None:
     cursor = data
     for key in path[:-1]:
@@ -208,6 +218,7 @@ def _apply_env_overrides(data: Dict[str, Any]) -> Dict[str, Any]:
         "B_BOT_STT_BASE_URL": ("stt", "base_url"),
         "B_BOT_STT_MODEL": ("stt", "model"),
         "B_BOT_DATABASE_PATH": ("database_path",),
+        "B_BOT_PLUGINS_PATH": ("plugins_path",),
         "B_BOT_TIMEZONE": ("timezone",),
     }
     typed_mappings: Dict[str, tuple] = {
@@ -225,6 +236,12 @@ def _apply_env_overrides(data: Dict[str, Any]) -> Dict[str, Any]:
         "B_BOT_MAX_NOTIFICATIONS_PER_MINUTE": (("max_notifications_per_minute",), _parse_int),
         "B_BOT_MAX_NOTIFICATION_RETRIES": (("max_notification_retries",), _parse_int),
         "B_BOT_SCHEDULER_ENABLED": (("scheduler_enabled",), _parse_bool),
+        "B_BOT_PLUGINS_ENABLED": (("plugins_enabled",), _parse_bool),
+        "B_BOT_PLUGIN_TOOL_TIMEOUT_SECONDS": (
+            ("plugin_tool_timeout_seconds",),
+            _parse_float,
+        ),
+        "B_BOT_PLUGIN_MAX_MANIFEST_BYTES": (("plugin_max_manifest_bytes",), _parse_int),
         "B_BOT_MAX_HISTORY_MESSAGES": (("max_history_messages",), _parse_int),
         "B_BOT_MAX_HISTORY_CHARS": (("max_history_chars",), _parse_int),
         "B_BOT_RETENTION_DAYS": (("retention_days",), _parse_int),
@@ -272,4 +289,5 @@ def load_config(config_path: Optional[Path] = None) -> AppConfig:
     config.database_path = _resolve_path(config.database_path)
     config.projects_path = _resolve_path(config.projects_path)
     config.backups_path = _resolve_path(config.backups_path)
+    config.plugins_path = _resolve_path(config.plugins_path)
     return config
