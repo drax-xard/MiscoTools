@@ -24,9 +24,20 @@ Versions are project-wide: a release covers every tool in the collection.
     Markdown export.
   - Read-only settings endpoint with redacted secrets and an editable system prompt.
   - Dependency-free web chat client under `B-BOT-Advanced/frontend/`.
-  - Architecture, plugin API, voice, deployment, and discovery documentation.
-  - Pytest suite covering health, auth, conversation CRUD, streaming, export, and
-    settings.
+  - Household member profiles with point totals.
+  - Recurring chores with assignment, completion history, and scoring.
+  - One-off and recurring reminders backed by SQLite and rebuilt into APScheduler
+    at startup, with grace-window and missed-run handling.
+  - Notification dispatcher with isolated web/voice channels, retries, rate
+    limiting, delivery logging, and a `voice.notify` event for the future voice
+    service.
+  - Strict recurrence parsing, household timezone support, schema migrations, and
+    notification/member/chore/reminder APIs.
+  - Architecture, plugin API, voice, deployment, discovery, and security-decision
+    documentation.
+  - Pytest suite covering health, auth, conversation CRUD, streaming, export,
+    settings, recurrence, migrations, members, chores, reminders, scheduler
+    recovery, and notifications.
 
 ### Fixed
 

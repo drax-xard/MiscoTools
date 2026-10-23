@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 import yaml
 from dotenv import load_dotenv
@@ -81,6 +82,17 @@ class AppConfig(BaseModel):
     voice: VoiceConfig = Field(default_factory=VoiceConfig)
     allow_cors: bool = False
 
+    # Household scheduling and device timezone.
+    timezone: str = "America/Argentina/Buenos_Aires"
+    scheduler_enabled: bool = True
+    max_scheduled_jobs: int = Field(default=500, ge=1)
+    min_recurrence_seconds: int = Field(default=60, ge=1)
+    reminder_grace_seconds: int = Field(default=3600, ge=0)
+
+    # Notification abuse controls.
+    max_notifications_per_minute: int = Field(default=30, ge=1)
+    max_notification_retries: int = Field(default=2, ge=0, le=10)
+
     # Abuse resistance (SEC-02/SEC-05).
     rate_limit_per_minute: int = Field(default=120, ge=1)
     global_rate_limit_per_minute: int = Field(default=600, ge=1)
@@ -112,6 +124,14 @@ class AppConfig(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _validate_timezone(self) -> "AppConfig":
+        try:
+            ZoneInfo(self.timezone)
+        except Exception as exc:
+            raise ValueError(f"Unknown timezone: {self.timezone}") from exc
+        return self
+
+    @model_validator(mode="after")
     def _validate_transport(self) -> "AppConfig":
         if self.allow_insecure_transport:
             return self
@@ -137,6 +157,7 @@ class AppConfig(BaseModel):
                 "enabled": self.voice.enabled,
                 "wake_words": self.voice.wake_words.model_dump(),
             },
+            "timezone": self.timezone,
             "retention_days": self.retention_days,
         }
 
@@ -187,6 +208,7 @@ def _apply_env_overrides(data: Dict[str, Any]) -> Dict[str, Any]:
         "B_BOT_STT_BASE_URL": ("stt", "base_url"),
         "B_BOT_STT_MODEL": ("stt", "model"),
         "B_BOT_DATABASE_PATH": ("database_path",),
+        "B_BOT_TIMEZONE": ("timezone",),
     }
     typed_mappings: Dict[str, tuple] = {
         "B_BOT_PORT": (("port",), _parse_int),
@@ -197,6 +219,12 @@ def _apply_env_overrides(data: Dict[str, Any]) -> Dict[str, Any]:
         "B_BOT_MAX_REQUEST_BODY_BYTES": (("max_request_body_bytes",), _parse_int),
         "B_BOT_MAX_RESPONSE_BYTES": (("max_response_bytes",), _parse_int),
         "B_BOT_MAX_CONCURRENT_STREAMS": (("max_concurrent_streams",), _parse_int),
+        "B_BOT_MAX_SCHEDULED_JOBS": (("max_scheduled_jobs",), _parse_int),
+        "B_BOT_MIN_RECURRENCE_SECONDS": (("min_recurrence_seconds",), _parse_int),
+        "B_BOT_REMINDER_GRACE_SECONDS": (("reminder_grace_seconds",), _parse_int),
+        "B_BOT_MAX_NOTIFICATIONS_PER_MINUTE": (("max_notifications_per_minute",), _parse_int),
+        "B_BOT_MAX_NOTIFICATION_RETRIES": (("max_notification_retries",), _parse_int),
+        "B_BOT_SCHEDULER_ENABLED": (("scheduler_enabled",), _parse_bool),
         "B_BOT_MAX_HISTORY_MESSAGES": (("max_history_messages",), _parse_int),
         "B_BOT_MAX_HISTORY_CHARS": (("max_history_chars",), _parse_int),
         "B_BOT_RETENTION_DAYS": (("retention_days",), _parse_int),

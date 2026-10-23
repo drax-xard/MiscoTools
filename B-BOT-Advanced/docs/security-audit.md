@@ -514,6 +514,33 @@ SEC-20–SEC-26 (plugins, tool calling, confirmation, notifications, devices,
 voice, Markdown) and SEC-29 (scheduler). They must be completed as part of those
 milestones before the related features ship.
 
+## Milestone 4 update — 2026-10-23
+
+The security-first backend slice for reminders, chores, and notifications is
+implemented. Design decisions are recorded in `docs/security-decisions.md`.
+
+- **SEC-29 — RESOLVED for this implementation.** Cadences are strict
+  (`daily`, `weekly`, `biweekly`, `monthly`, `every:N:days|weeks`), minimum
+  intervals and job caps are enforced, timestamps are stored in UTC, recurrence
+  math uses the configured household timezone, and jobs are idempotent per
+  occurrence. Overdue reminders beyond the grace window are marked missed.
+- **SEC-23 — PARTIALLY ADDRESSED.** Built-in `web` and `voice` channels use
+  validated targets, capped retries, per-minute rate limiting, failure
+  isolation, and delivery logging. External providers and user-supplied URLs
+  are still deferred; when added they must follow the recorded secret,
+  allowlist, and opt-in rules.
+- **SEC-20 — PARTIALLY ADDRESSED.** The design now mandates first-party-only
+  plugins and a capability-scoped context. Subprocess isolation is still
+  required before third-party plugin installation; the plugin loader is the
+  next implementation task.
+- **SEC-21/SEC-22 — DESIGN ONLY.** LLM tool calling and the single-use
+  confirmation protocol are not implemented. The chat path still does not call
+  tools.
+- **Dependency audit:** `pip-audit` reports eight advisories whose named fixed
+  versions are unavailable or incompatible with the pinned FastAPI version. CI
+  ignores those exact IDs with a dated rationale; this is a tracked risk, not a
+  clean audit result.
+
 ## Controls working well
 
 - **Fail-closed authentication:** empty configuration rejects all API access

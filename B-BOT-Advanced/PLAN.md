@@ -1,6 +1,6 @@
 # B-BOT Advanced — Development Plan
 
-**Status:** Draft
+**Status:** In progress (Milestones 2–3 complete; Milestone 4 backend foundation complete)
 
 **Primary target:** Raspberry Pi 5 (8 GB) running Raspberry Pi OS 64-bit natively.
 
@@ -267,7 +267,7 @@ B-BOT-Advanced/
 - Keep B-BOT Lite functional and dependency-free.
 - Acceptance: B-BOT Lite runs from the new path; the Advanced service starts and reports health.
 
-### 3. Backend and chat MVP
+### 3. Backend and chat MVP **Completed.**
 
 - Implement the SQLite schema, conversation persistence, LLM streaming, and settings.
 - Build a web chat UI with streaming, stop, retry, and export.
@@ -275,6 +275,10 @@ B-BOT-Advanced/
 - Acceptance: a conversation streams from the remote model, survives a restart, and can be exported.
 
 ### 4. Plugins, reminders, chores, and notifications
+
+> Backend foundation completed (members, chores, reminders, scheduler, event bus,
+> notification dispatcher). Plugin loader/permissions and the Today/notification UI
+> remain.
 
 - Implement the plugin loader, manifest validation, permissions, and audit log.
 - Add household member profiles, reminders, recurring chores, assignments, points, and completion history.

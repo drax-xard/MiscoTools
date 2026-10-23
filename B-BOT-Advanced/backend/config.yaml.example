@@ -50,6 +50,17 @@ docs_enabled: false
 security_headers: true
 serve_frontend: true
 
+# Household scheduling. Times are stored in UTC; recurrences use this timezone.
+timezone: "America/Argentina/Buenos_Aires"
+scheduler_enabled: true
+max_scheduled_jobs: 500
+min_recurrence_seconds: 60
+reminder_grace_seconds: 3600
+
+# Notification abuse controls.
+max_notifications_per_minute: 30
+max_notification_retries: 2
+
 # Abuse controls (per client IP, per process).
 rate_limit_per_minute: 120
 global_rate_limit_per_minute: 600

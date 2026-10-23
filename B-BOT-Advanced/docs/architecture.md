@@ -24,13 +24,17 @@ Smart LEDs / GPIO / optional HA ─────┘             │
 | LLM (`core/llm.py`) | OpenAI-compatible streaming client | Implemented |
 | Chat API (`api/chat.py`) | Conversations, SSE streaming, export | Implemented |
 | Settings API (`api/settings.py`) | User-facing settings, system prompt | Implemented |
-| Router (`core/router.py`) | Deterministic parsing + LLM tool calls | Planned |
-| Scheduler (`core/scheduler.py`) | APScheduler reminders and chores | Planned |
-| Event bus (`core/events.py`) | Sensor/device/voice events | Planned |
-| Plugins (`plugins/`) | Manifest, permissions, tools, audit | Planned |
-| Voice (`voice/`) | Wake word, VAD, STT, TTS, state machine | Planned |
-| Devices (`devices/`) | LEDs, Home Assistant, MQTT, GPIO | Planned |
-| Notifications (`notifications/`) | Channel registry and dispatch | Planned |
+| Router (`core/router.py`) | Deterministic parsing + LLM tool calls | Planned (Milestone 5) |
+| Scheduler (`core/scheduler.py`) | APScheduler reminders and chores, rebuilt from SQLite | Implemented |
+| Event bus (`core/events.py`) | Persisted async events, including `voice.notify` | Implemented |
+| Recurrence (`core/recurrence.py`) | Strict cadences and household-timezone math | Implemented |
+| Members API (`api/members.py`) | Household profiles and point totals | Implemented |
+| Chores API (`api/chores.py`) | Recurrence, assignment, completion, scoring | Implemented |
+| Reminders API (`api/reminders.py`) | One-off and recurring reminders | Implemented |
+| Plugins (`plugins/`) | Manifest, permissions, tools, audit | Planned (next session) |
+| Voice (`voice/`) | Wake word, VAD, STT, TTS, state machine | Planned (Milestone 5) |
+| Devices (`devices/`) | LEDs, Home Assistant, MQTT, GPIO | Planned (Milestone 6) |
+| Notifications (`notifications/`) | Channel registry, dispatcher, web/voice channels | Implemented |
 
 ## Request flow (chat)
 
@@ -42,6 +46,21 @@ Smart LEDs / GPIO / optional HA ─────┘             │
    as a `done` event. Streamed bytes and concurrent streams are capped.
 5. Errors are emitted as a generic `error` event with a server-side correlation ID; partial
    replies are saved when possible.
+
+## Reminder, chore, and notification flow
+
+1. A reminder or chore is stored in SQLite with a UTC due timestamp and, for
+   recurring items, a strict cadence label.
+2. The scheduler service holds only in-memory APScheduler date triggers. At
+   startup it rebuilds them from pending database rows.
+3. When a trigger fires, the service checks the occurrence idempotency marker,
+   applies the grace/missed policy, and calls the notification dispatcher.
+4. The dispatcher creates one notification record and fans out to enabled
+   channels. Each channel attempt is isolated, retried within a cap, and logged
+   in `notification_log`.
+5. The `web` channel is read by the browser inbox API. The `voice` channel
+   publishes a persisted `voice.notify` event and is marked `queued`; audio is
+   produced by the Milestone 5 voice service.
 
 ## Portability rules
 
@@ -65,4 +84,10 @@ daily backups, structured memory first (vector search later).
 - **SSE over WebSockets for chat.** Simpler through reverse proxies and easy to reconnect.
 - **Fail closed on auth.** No token means no authenticated route.
 - **SQLite with FTS5 now, vectors later.** Keeps the first release small.
-- **In-process plugins with permission checks.** Subprocess isolation can be added later.
+- **SQLite is the scheduler source of truth.** APScheduler jobs are rebuilt at
+  startup, so a restart cannot lose reminders or chores.
+- **First-party plugins only for now.** In-process permission checks are not a
+  security boundary; subprocess isolation is designed but deferred. See
+  `docs/security-decisions.md`.
+- **Web notifications are polled first.** A dedicated SSE notification stream is
+  deferred until the dashboard needs it.

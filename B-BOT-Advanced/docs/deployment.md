@@ -41,6 +41,8 @@ Set at minimum:
 
 - `B_BOT_AUTH_TOKEN` — a long random household token.
 - `B_BOT_LLM_BASE_URL` and `B_BOT_LLM_MODEL` — the inference machine.
+- `B_BOT_TIMEZONE` — defaults to `America/Argentina/Buenos_Aires`; reminder and
+  chore recurrences use this zone.
 - `B_BOT_HOST` — keep `127.0.0.1` unless a reverse proxy or Tailscale fronts the Pi.
 
 Generate a token with:

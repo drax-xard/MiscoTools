@@ -3,8 +3,10 @@
 Plugins extend B-BOT with tools, triggers, and notification channels. Each plugin is a
 folder containing a manifest and a Python entry point.
 
-> Status: the contract below is the target for milestone 4. The loader, permission
-> checks, and audit entries are not implemented yet.
+> Status: the notification dispatcher and built-in `web`/`voice` channels are
+> implemented. The plugin manifest loader, permission checks, and tool audit are
+> the next milestone 4 task. Until subprocess isolation exists, only first-party
+> plugins are allowed; see `docs/security-decisions.md`.
 
 ## Manifest
 

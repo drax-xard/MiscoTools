@@ -8,22 +8,31 @@ See [PLAN.md](PLAN.md) for the full development plan and milestones.
 
 ## Status
 
-Milestones 2 (skeleton) and 3 (backend and chat MVP) are in progress. The backend
-currently provides:
+Milestones 2 (skeleton) and 3 (backend and chat MVP) are complete. Milestone 4
+(plugins, reminders, chores, notifications) has its security-first backend
+foundation implemented:
 
 - FastAPI service with a public `/health` endpoint.
 - Bearer-token authentication for every `/api` route, with failure lockout and
   zero-downtime token rotation.
-- SQLite storage in WAL mode with FTS5 message/document indexes.
+- SQLite storage in WAL mode with FTS5 message/document indexes and guarded
+  schema migrations.
 - Conversation list, create, rename, delete, and Markdown export.
 - Streamed chat completions from any OpenAI-compatible endpoint via SSE, with
   request/response/history limits.
+- Household members with point totals.
+- Recurring chores with assignment, completion history, and scoring.
+- One-off and recurring reminders persisted across restarts and rebuilt into
+  APScheduler at startup.
+- A notification dispatcher with isolated channels, retries, rate limiting,
+  delivery logging, and built-in `web` and `voice` channels. The voice channel
+  queues a `voice.notify` event for the Milestone 5 voice service.
 - Read-only settings plus an editable system prompt.
 - A dependency-free web chat client served by the backend with CSP and security
   headers.
 
-Voice, plugins, chores, notifications, and device adapters are scaffolded but not
-implemented yet.
+The plugin loader and the Today/notification web UI are the next Milestone 4
+tasks. Voice, GPIO, and external notification providers remain planned.
 
 ## Layout
 
@@ -32,9 +41,9 @@ backend/
   app/
     main.py            FastAPI app factory and lifespan
     deps.py            auth and storage dependencies
-    core/              config, database, LLM client
-    api/               chat and settings routes
-    notifications/     channel dispatcher (planned)
+    core/              config, database, LLM, events, scheduler, recurrence
+    api/               chat, settings, members, chores, reminders, notifications
+    notifications/     channel contract, dispatcher, web/voice channels
     plugins/           loader, registry, permissions (planned)
     voice/             wake word, VAD, STT, TTS (planned)
     devices/           LEDs, Home Assistant, MQTT, GPIO (planned)

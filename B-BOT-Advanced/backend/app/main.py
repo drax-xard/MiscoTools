@@ -13,10 +13,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.chat import router as chat_router
+from app.api.chores import router as chores_router
+from app.api.members import router as members_router
+from app.api.notifications import router as notifications_router
+from app.api.reminders import router as reminders_router
 from app.api.settings import router as settings_router
 from app.core.config import BACKEND_DIR, AppConfig, load_config
 from app.core.database import Database
+from app.core.events import EventBus
 from app.core.llm import LLMProvider
+from app.core.scheduler import SchedulerService
 from app.core.security import (
     SECURITY_HEADERS,
     BodySizeLimitMiddleware,
@@ -24,6 +30,7 @@ from app.core.security import (
     RateLimitMiddleware,
     SecurityHeadersMiddleware,
 )
+from app.notifications.dispatcher import NotificationDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -98,17 +105,34 @@ def create_app(config: Optional[AppConfig] = None) -> FastAPI:
                 removed["audit_log"],
             )
 
+        events = EventBus(database)
+        notifications = NotificationDispatcher(database, active_config_resolved, events)
+        scheduler = SchedulerService(
+            active_config_resolved, database, events, notifications
+        )
+
         app.state.db = database
         app.state.llm = LLMProvider(active_config_resolved.llm)
+        app.state.events = events
+        app.state.notifications = notifications
+        app.state.scheduler = scheduler
         app.state.stream_semaphore = asyncio.Semaphore(
             active_config_resolved.max_concurrent_streams
         )
-        yield
+        scheduler.start()
+        try:
+            yield
+        finally:
+            scheduler.shutdown()
 
     app.router.lifespan_context = lifespan
 
     app.include_router(chat_router)
     app.include_router(settings_router)
+    app.include_router(members_router)
+    app.include_router(chores_router)
+    app.include_router(reminders_router)
+    app.include_router(notifications_router)
 
     @app.get("/health", tags=["system"])
     def health() -> dict:
