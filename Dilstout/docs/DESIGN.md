@@ -182,6 +182,16 @@ preset can warn when a pack changes underneath it.
 
 ```
 index.html
+styles.css
+ui/
+  app.js              bootstrap, state, presets, notifications
+  mixer.js            weighted pack cards and category overrides
+  results.js          batches, provenance, copy and export
+  gallery.js          saved and bundled .lpp presets
+  studio.js           schema-driven .lap editor and preview
+  store.js            IndexedDB preset storage with fallback
+  format.js           text/CSV export and CSV/text import helpers
+  dom.js              small DOM helpers
 core/
   rng.js              seeded PRNG and shareable seed codes
   registry.js         named registries for all extension points
@@ -372,6 +382,8 @@ v1 scope: **data plus JS hooks**.
 
 ## 8. UI surfaces
 
+Implemented in M3 as dependency-free ES modules. The app has no framework and no build step.
+
 - **Mixer.** Add/remove LAPs, drag weights, per-category overrides, strategy and renderer
   selectors, `blendStrength` placeholder.
 - **Results.** Batch count, copy, CSV/text export, provenance detail, "why this name".
@@ -393,6 +405,11 @@ imports of the schemas.
 - Morphophonemic fixture table.
 - Byte-identical determinism for identical preset + seed + pack versions.
 - Provenance completeness: every character and phoneme traceable to a source.
+- UI helpers: text and CSV export escaping, CSV/text import, root gloss merging, and
+  preset availability/version summaries.
+- Browser smoke run (`tests/browser-smoke.mjs`): load packs, generate, inspect provenance,
+  save and export a preset, reload and load it, edit a pack in the Studio, import entries,
+  export `.lap`, and add the pack to the mixer.
 
 ## 10. Risks and mitigations
 

@@ -6,7 +6,8 @@
   "description": "Portable random name generator with mixable language packs.",
   "scripts": {
     "test": "node --test",
-    "test:watch": "node --test --watch"
+    "test:watch": "node --test --watch",
+    "test:browser": "node tests/browser-smoke.mjs"
   },
   "engines": {
     "node": ">=22.14"

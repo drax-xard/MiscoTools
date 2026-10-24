@@ -85,15 +85,18 @@ declare only resolvable slots, and produce 100 unique warning-free names per cat
 
 ## M3 — Web UI, Gallery, Studio
 
-**Status:** planned
+**Status:** done
 
-- [ ] `index.html`, `ui/app.js`, `ui/mixer.js`, `ui/results.js`, `ui/gallery.js`, `ui/studio.js`.
-- [ ] Mixer: add/remove packs, weight sliders, per-category overrides, strategy and renderer selectors.
-- [ ] Results: batch size, copy, CSV/text export, provenance detail.
-- [ ] Gallery: save/load/export `.lpp`, bundled presets, missing-pack warnings from `pins`.
-- [ ] Studio: schema-generated form, live preview, validation panel, CSV/text import, `.lap` export.
-- [ ] Responsive layout consistent with LlamaTune and B-BOT Lite.
-- [ ] Browser smoke test for load → mix → generate → save preset → reload.
+Verified with `tests/ui-format.test.js` and `tests/browser-smoke.mjs`, covering pack load,
+generation, provenance, preset save/export/reload/load, and the Studio edit/import/export flow.
+
+- [x] `index.html`, `ui/app.js`, `ui/mixer.js`, `ui/results.js`, `ui/gallery.js`, `ui/studio.js`.
+- [x] Mixer: add/remove packs, weight sliders, per-category overrides, strategy and renderer selectors.
+- [x] Results: batch size, copy, CSV/text export, provenance detail.
+- [x] Gallery: save/load/export `.lpp`, bundled presets, missing-pack warnings from `pins`.
+- [x] Studio: schema-generated form, live preview, validation panel, CSV/text import, `.lap` export.
+- [x] Responsive layout consistent with LlamaTune and B-BOT Lite.
+- [x] Browser smoke test for load → mix → generate → save preset → reload.
 
 ## M4 — Plug-in host
 

@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dilstout is a portable, offline name generator that mixes language packs into person, place, organization, and domain names.">
+  <meta name="color-scheme" content="dark">
+  <title>Dilstout — language pack name mixer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0c12'/%3E%3Cpath d='M8 9h9a7 7 0 0 1 0 14H8z' fill='none' stroke='%23f0b45e' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M12 16h9' stroke='%237dd3c0' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Dilstout home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M8 9h8.5a7 7 0 0 1 0 14H8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M12 16h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="21" cy="16" r="1.4" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">Dilstout</span>
+        <span class="brand-sub">naughty tongue</span>
+      </span>
+    </a>
+
+    <nav class="tabs" role="tablist" aria-label="Dilstout sections">
+      <button class="tab is-active" type="button" role="tab" id="tab-workspace" data-tab="workspace" aria-selected="true" aria-controls="panel-workspace">Mixer</button>
+      <button class="tab" type="button" role="tab" id="tab-gallery" data-tab="gallery" aria-selected="false" aria-controls="panel-gallery">Gallery</button>
+      <button class="tab" type="button" role="tab" id="tab-studio" data-tab="studio" aria-selected="false" aria-controls="panel-studio">LAP Studio</button>
+    </nav>
+
+    <div class="topbar-meta">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span>offline</span>
+      <span class="meta-separator" aria-hidden="true"></span>
+      <span>no telemetry</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow"><span>01</span> Language pack name mixing</p>
+        <h1>Borrow a tongue.<br><em>Build a name.</em></h1>
+      </div>
+      <p class="hero-copy">Weight real naming systems against each other to make people, places, organizations, and realms. Every result keeps its sources, so you can see exactly which pack shaped it.</p>
+    </section>
+
+    <div id="banner" class="banner" role="alert" hidden></div>
+
+    <section class="tab-panel" id="panel-workspace" role="tabpanel" aria-labelledby="tab-workspace">
+      <div class="workspace">
+        <aside class="panel mixer-panel" aria-label="Pack mixer">
+          <div class="panel-heading">
+            <span class="step-number">01</span>
+            <div>
+              <h2>Pack mixer</h2>
+              <p>Set the weight of each language pack.</p>
+            </div>
+          </div>
+
+          <div id="mix-list" class="mix-list"></div>
+
+          <div class="add-pack-row">
+            <select id="add-pack-select" aria-label="Pack to add"></select>
+            <button id="add-pack" class="button" type="button">Add</button>
+          </div>
+          <p class="inline-note">or <label class="link-button" for="open-lap">open a .lap file<input id="open-lap" type="file" accept=".lap,application/json"></label></p>
+
+          <div class="field-grid two">
+            <div class="field">
+              <label for="strategy-select">Mixing strategy</label>
+              <select id="strategy-select"></select>
+            </div>
+            <div class="field">
+              <label for="renderer-select">Renderer</label>
+              <select id="renderer-select"></select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="seed-input">Seed</label>
+            <div class="seed-row">
+              <input id="seed-input" type="text" spellcheck="false" autocomplete="off">
+              <button id="random-seed" class="button subtle" type="button">New</button>
+            </div>
+            <p class="field-note">The same mix and seed reproduce the same batch.</p>
+          </div>
+
+          <div id="mix-summary" class="mix-summary" aria-live="polite"></div>
+        </aside>
+
+        <section class="panel results-panel" aria-label="Generated names">
+          <div class="panel-heading">
+            <span class="step-number">02</span>
+            <div>
+              <h2>Generated names</h2>
+              <p>Batch, inspect, and export.</p>
+            </div>
+          </div>
+
+          <div class="result-controls">
+            <div class="field">
+              <label for="category-select">Category</label>
+              <select id="category-select">
+                <option value="person">Person</option>
+                <option value="place">Place</option>
+                <option value="organization">Organization</option>
+                <option value="domain">Domain</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="count-input">How many</label>
+              <input id="count-input" type="number" min="1" max="200" step="1" value="10" inputmode="numeric">
+            </div>
+            <button id="generate" class="button primary" type="button">Generate</button>
+          </div>
+
+          <div id="result-toolbar" class="result-toolbar" hidden>
+            <span id="result-meta" class="result-meta"></span>
+            <div class="toolbar-actions">
+              <button id="copy-all" class="button ghost" type="button">Copy</button>
+              <button id="export-txt" class="button ghost" type="button">.txt</button>
+              <button id="export-csv" class="button ghost" type="button">.csv</button>
+            </div>
+          </div>
+
+          <div id="results" class="results-list" aria-live="polite"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-gallery" role="tabpanel" aria-labelledby="tab-gallery" hidden>
+      <div class="gallery-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <span class="step-number">03</span>
+            <div>
+              <h2>Current mix</h2>
+              <p>Save it as a .lpp preset.</p>
+            </div>
+          </div>
+          <div id="gallery-current-summary" class="summary-block"></div>
+          <div class="field">
+            <label for="preset-name">Preset name</label>
+            <input id="preset-name" type="text" spellcheck="false" autocomplete="off" placeholder="Babylonian / Aztec 50-50">
+          </div>
+          <div class="card-actions">
+            <button id="save-preset" class="button primary" type="button">Save</button>
+            <button id="export-preset" class="button subtle" type="button">Export .lpp</button>
+            <button id="copy-preset" class="button ghost" type="button">Copy JSON</button>
+          </div>
+          <p class="inline-note">or <label class="link-button" for="open-lpp">open a .lpp file<input id="open-lpp" type="file" accept=".lpp,application/json"></label></p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <span class="step-number">04</span>
+            <div>
+              <h2>Saved presets</h2>
+              <p>Stored in this browser.</p>
+            </div>
+          </div>
+          <div id="saved-presets" class="preset-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <span class="step-number">05</span>
+            <div>
+              <h2>Bundled presets</h2>
+              <p>Ready-made mixes.</p>
+            </div>
+          </div>
+          <div id="bundled-presets" class="preset-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
+      <div class="studio-layout">
+        <section class="panel studio-editor">
+          <div class="panel-heading">
+            <span class="step-number">06</span>
+            <div>
+              <h2>LAP Studio</h2>
+              <p>Author a language pack, validate it, and preview it live.</p>
+            </div>
+          </div>
+
+          <div class="studio-toolbar">
+            <div class="field">
+              <label for="studio-start">Start from</label>
+              <select id="studio-start"></select>
+            </div>
+            <label class="button subtle" for="studio-open-lap">Open .lap<input id="studio-open-lap" type="file" accept=".lap,application/json"></label>
+            <button id="studio-import-toggle" class="button ghost" type="button">Import CSV / text</button>
+            <button id="studio-validate" class="button ghost" type="button">Validate</button>
+          </div>
+
+          <div id="studio-import-panel" class="import-panel" hidden>
+            <div class="field-grid two">
+              <div class="field">
+                <label for="studio-import-target">Import into</label>
+                <select id="studio-import-target"></select>
+              </div>
+              <div class="field">
+                <label for="studio-import-file">CSV or text file</label>
+                <input id="studio-import-file" type="file" accept=".csv,.txt,text/csv,text/plain">
+              </div>
+            </div>
+            <div class="field">
+              <label for="studio-import-text">Lines to append</label>
+              <textarea id="studio-import-text" rows="5" spellcheck="false" placeholder="One entry per line. For roots: root: gloss, gloss"></textarea>
+            </div>
+            <div class="import-actions">
+              <button id="studio-import-append" class="button subtle" type="button">Append entries</button>
+              <span id="studio-import-status" class="field-note" role="status"></span>
+            </div>
+          </div>
+
+          <div id="studio-form" class="studio-form"></div>
+        </section>
+
+        <aside class="studio-side">
+          <section class="panel">
+            <div class="panel-heading compact">
+              <div>
+                <h2>Validation</h2>
+                <p>Schema checks run on every edit.</p>
+              </div>
+            </div>
+            <div id="studio-validation" class="validation-panel" aria-live="polite"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading compact">
+              <div>
+                <h2>Live preview</h2>
+                <p>Generated from the draft only.</p>
+              </div>
+            </div>
+            <div class="field">
+              <label for="studio-category">Preview category</label>
+              <select id="studio-category">
+                <option value="person">Person</option>
+                <option value="place">Place</option>
+                <option value="organization">Organization</option>
+                <option value="domain">Domain</option>
+              </select>
+            </div>
+            <div id="studio-preview" class="preview-panel" aria-live="polite"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading compact">
+              <div>
+                <h2>Actions</h2>
+                <p>Export or use the pack immediately.</p>
+              </div>
+            </div>
+            <div class="stack-actions">
+              <button id="studio-export" class="button primary" type="button">Export .lap</button>
+              <button id="studio-add-mix" class="button subtle" type="button">Add to mixer</button>
+            </div>
+            <p class="field-note">Exports stay on your machine. Add to mixer keeps the pack in memory for this session.</p>
+          </section>
+
+          <details class="panel studio-guide">
+            <summary>Authoring quick guide</summary>
+            <div class="guide-body">
+              <ol>
+                <li>Narrow the scope: one language, period, and dialect.</li>
+                <li>Collect grammars and onomastic sources before inventing roots.</li>
+                <li>Fill the inventory with IPA and articulatory features you can source.</li>
+                <li>Map your transliteration to IPA, then add roots and templates.</li>
+                <li>Add join rules only for real boundary processes.</li>
+                <li>Record sources, license, and scope notes before sharing.</li>
+              </ol>
+              <p>Read the <a href="docs/lap-authoring-guide.md">full authoring guide</a> for field-by-field advice and the quality checklist.</p>
+            </div>
+          </details>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Dilstout works offline. Packs and presets stay in your browser.</span>
+    <span class="meta-separator" aria-hidden="true"></span>
+    <a href="docs/lap-authoring-guide.md">Authoring guide</a>
+    <a href="docs/plugin-api.md">Plugin API</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">Dilstout needs JavaScript to load packs and generate names.</p></noscript>
+  <script type="module" src="ui/app.js"></script>
+</body>
+</html>
