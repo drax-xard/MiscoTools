@@ -12,6 +12,10 @@ A lightweight, dependency-free everyday AI assistant. Connects directly to any O
 
 Always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses a remote OpenAI-compatible LLM, local voice interaction, plugins, reminders, home automation, and a project workspace. The FastAPI backend, streamed chat MVP, SQLite storage, and web client are in place. See the [development plan](B-BOT-Advanced/PLAN.md).
 
+### [GitView](GitView/README.md)
+
+A dependency-free CLI that turns any local Git repository into a single self-contained HTML report. Includes commit history, activity charts, contributor and file-type breakdowns, a searchable file tree, instant commit search, and dark/light themes. Requires only Python 3.9+ and Git.
+
 ### [LlamaTune](LlamaTune/index.html)
 
 Estimate the best `llama.cpp` `llama-server` launch flags for your GPU, RAM, and GGUF model. Generates an optimized launch command and memory plan for speed-first, balanced, or context-first use, reads model metadata directly from local GGUF files, supports separate K/V cache quantization and PrismML `PTQ1_0`/`PQ2_0` ternary schemes, and saves presets as bash scripts.
