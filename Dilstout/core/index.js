@@ -69,3 +69,4 @@ export { createMixer, mixerFromPreset } from './mixer.js';
 export { generate, parseTemplate } from './engine.js';
 export { validate, validateLap, validateLpp, validatePluginManifest } from './schema.js';
 export { buildDefaultPreset } from './defaults.js';
+export { createPluginHost, validatePluginForHost, HOST_API_VERSION } from './plugin-host.js';

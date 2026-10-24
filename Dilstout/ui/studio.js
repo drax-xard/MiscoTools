@@ -1,4 +1,5 @@
 import { lapSchema, validateLap } from '../core/schema.js';
+import { registry } from '../core/registry.js';
 import { loadLap } from '../core/lap.js';
 import { generate } from '../core/engine.js';
 import { IMPORT_TARGETS, importIntoDraft } from './format.js';
@@ -517,6 +518,15 @@ export function createStudioView(app) {
 
   const debouncePreview = debounce(runPreview, 300);
 
+  function refreshCategories() {
+    const current = previewCategory.value || 'person';
+    clear(previewCategory);
+    for (const meta of registry.categories.list()) {
+      previewCategory.append(el('option', { value: meta.id, text: meta.label ?? meta.id }));
+    }
+    previewCategory.value = registry.categories.has(current) ? current : 'person';
+  }
+
   function rebuildSources() {
     const previous = startSelect.value;
     clear(startSelect);
@@ -549,6 +559,7 @@ export function createStudioView(app) {
   }
 
   function mount() {
+    refreshCategories();
     rebuildSources();
     renderForm();
 
@@ -640,6 +651,7 @@ export function createStudioView(app) {
   return {
     mount,
     refreshSources: rebuildSources,
+    refreshCategories,
     open: openLap,
   };
 }

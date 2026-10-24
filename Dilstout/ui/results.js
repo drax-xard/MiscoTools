@@ -1,3 +1,4 @@
+import { registry } from '../core/registry.js';
 import { resultsToCsv, resultsToText } from './format.js';
 import { $, clear, copyText, download, el } from './dom.js';
 
@@ -11,6 +12,8 @@ export function createResultsView(app) {
   const copyAllButton = $('#copy-all');
   const exportTxtButton = $('#export-txt');
   const exportCsvButton = $('#export-csv');
+  const exporterHost = $('#plugin-exporters');
+  let exporterButtons = [];
 
   function lastRun() {
     return app.state.lastRun;
@@ -20,6 +23,7 @@ export function createResultsView(app) {
     const run = lastRun();
     if (!run || run.results.length === 0) {
       toolbar.hidden = true;
+      for (const button of exporterButtons) button.disabled = true;
       return;
     }
     toolbar.hidden = false;
@@ -35,6 +39,52 @@ export function createResultsView(app) {
     copyAllButton.disabled = false;
     exportTxtButton.disabled = false;
     exportCsvButton.disabled = false;
+    for (const button of exporterButtons) button.disabled = false;
+  }
+
+  function refreshCategories() {
+    clear(categorySelect);
+    for (const meta of registry.categories.list()) {
+      categorySelect.append(
+        el('option', {
+          value: meta.id,
+          text: meta.label ?? meta.id,
+          title: meta.description ?? '',
+        }),
+      );
+    }
+    if (!registry.categories.has(app.state.category)) app.state.category = 'person';
+    categorySelect.value = app.state.category;
+  }
+
+  function refreshExporters() {
+    clear(exporterHost);
+    exporterButtons = [];
+    for (const meta of registry.exporters.list()) {
+      const exporter = registry.exporters.get(meta.id);
+      const button = el('button', {
+        class: 'button ghost',
+        type: 'button',
+        text: meta.label ?? exporter.label ?? meta.id,
+        disabled: !lastRun(),
+        onclick: () => {
+          const run = lastRun();
+          if (!run) return;
+          try {
+            const output = exporter.export(run.results, { app });
+            if (!output || typeof output.text !== 'string') {
+              throw new Error(`Exporter "${meta.id}" returned no text`);
+            }
+            download(output.filename ?? `dilstout-${meta.id}.txt`, output.text, output.mime ?? 'text/plain');
+            app.notify(`Exported with ${meta.label ?? meta.id}.`);
+          } catch (error) {
+            app.notify(error.message, 'error');
+          }
+        },
+      });
+      exporterButtons.push(button);
+      exporterHost.append(button);
+    }
   }
 
   function renderResultCard(result) {
@@ -153,6 +203,8 @@ export function createResultsView(app) {
     });
     generateButton.addEventListener('click', () => app.generate());
 
+    refreshCategories();
+    refreshExporters();
     copyAllButton.addEventListener('click', async () => {
       const run = lastRun();
       if (!run) return;
@@ -171,5 +223,5 @@ export function createResultsView(app) {
     });
   }
 
-  return { mount, render, renderControls, markStale };
+  return { mount, render, renderControls, markStale, refreshCategories, refreshExporters };
 }

@@ -52,5 +52,7 @@ export const registry = {
   phonemeResolvers: createRegistry('phonemeResolvers'),
   categories: createRegistry('categories'),
   importers: createRegistry('importers'),
+  exporters: createRegistry('exporters'),
   validators: createRegistry('validators'),
+  uiPanels: createRegistry('uiPanels'),
 };

@@ -1,0 +1,12 @@
+{
+  "format": "dilstout.plugin",
+  "id": "example-hooks",
+  "name": "Example Hooks",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "entry": "index.js",
+  "description": "Demonstrates a custom slot, a category, a Markdown exporter, and a UI panel.",
+  "author": "Dilstout",
+  "license": "Same as the repository",
+  "capabilities": ["slot", "category", "exporter", "uiPanel"]
+}

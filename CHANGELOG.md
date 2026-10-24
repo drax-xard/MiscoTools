@@ -24,7 +24,7 @@ Versions are project-wide: a release covers every tool in the collection.
   - Ancient Babylonian (Akkadian) and Aztec (Nahuatl) starter packs with IPA inventories,
     ASCII romanization, prosody, join rules, sources, and experimental status.
   - Synthetic test pack, a 50/50 Babylonian/Aztec preset, and a bundled single-pack
-    `.lpp` example; 65 core, pack, and UI-helper tests.
+    `.lpp` example; 72 core, pack, UI-helper, and plugin-host tests.
   - Dependency-free web app with a weighted pack mixer, per-category overrides, category
     batches, provenance and IPA detail, copy and CSV/text export.
   - Preset gallery with bundled presets, IndexedDB-backed saving, `.lpp` import/export,
@@ -34,6 +34,13 @@ Versions are project-wide: a release covers every tool in the collection.
     add-to-mixer workflow.
   - Headless Chrome smoke test covering load, generate, save, reload, load preset, and
     Studio preview.
+  - Plugin host with manifest validation, an API-version gate, registration rollback,
+    unload, bundled plugin loading, and confirmed local single-file `.js` loading.
+  - Exporter and UI-panel registries; results toolbar exports and the Plugins tab.
+  - Bundled `example-hooks` plugin with a syllable slot, Syllable chant category, Markdown
+    exporter, and demo panel.
+  - Plugin test suite for manifests, API versions, collisions, rollback, unload, and the
+    example plugin end to end; browser smoke covers local plugin loading and rejection.
 - **LlamaTune** — PrismML ternary quantization options (`PTQ1_0` and `PQ2_0`) in the
   picker, weight estimates, GGUF auto-detection (tensor types 142/143 and file types
   141/143), generated model filenames, and a PrismML runtime warning.

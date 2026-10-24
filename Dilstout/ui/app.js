@@ -9,6 +9,8 @@ import { createMixerView } from './mixer.js';
 import { createResultsView } from './results.js';
 import { createGalleryView } from './gallery.js';
 import { createStudioView } from './studio.js';
+import { createPluginsView } from './plugins.js';
+import { createPluginHost } from '../core/plugin-host.js';
 import { summarizePreset } from './format.js';
 import { $, $$, readTextFile } from './dom.js';
 
@@ -60,6 +62,8 @@ const state = {
 let toastTimer = null;
 let views = null;
 
+const pluginHost = createPluginHost({ registry });
+
 function showBanner(message) {
   const banner = $('#banner');
   banner.hidden = false;
@@ -78,6 +82,7 @@ function notify(message, tone = 'info') {
 
 const app = {
   state,
+  plugins: pluginHost,
   notify,
 
   packsList() {
@@ -269,6 +274,7 @@ const app = {
     }
     if (name === 'gallery') gallery.render();
     if (name === 'studio') studio.refreshSources();
+    if (name === 'plugins') plugins.render();
   },
 
   refresh() {
@@ -278,6 +284,17 @@ const app = {
     results.markStale();
     gallery.renderCurrent();
     studio.refreshSources();
+  },
+
+  refreshPlugins() {
+    if (!views) return;
+    if (!registry.categories.has(state.category)) state.category = 'person';
+    views.results.refreshCategories();
+    views.studio.refreshCategories();
+    views.results.refreshExporters();
+    views.plugins.render();
+    views.results.renderControls();
+    results.markStale();
   },
 
   async init() {
@@ -306,6 +323,13 @@ const app = {
       }
     }
 
+    try {
+      const pluginErrors = await pluginHost.loadBundled('plugins/index.json');
+      failures.push(...pluginErrors);
+    } catch (error) {
+      failures.push(`plugins: ${error.message}`);
+    }
+
     state.bundledPresets = presetIndex;
     const preferred = ['ancient-babylonian', 'aztec'].filter((id) => state.packs.has(id));
     const chosen = preferred.length > 0 ? preferred : [...state.packs.keys()].slice(0, 2);
@@ -323,18 +347,21 @@ const app = {
       results: createResultsView(app),
       gallery: createGalleryView(app),
       studio: createStudioView(app),
+      plugins: createPluginsView(app),
     };
-    const { mixer, results, gallery, studio } = views;
+    const { mixer, results, gallery, studio, plugins } = views;
 
     mixer.mount();
     results.mount();
     gallery.mount();
     studio.mount();
+    plugins.mount();
 
     mixer.render();
     results.renderControls();
     results.render();
     gallery.render();
+    plugins.render();
 
     for (const button of $$('[data-tab]')) {
       button.addEventListener('click', () => app.setTab(button.dataset.tab));
@@ -367,6 +394,10 @@ const gallery = {
 
 const studio = {
   refreshSources: () => views?.studio.refreshSources(),
+};
+
+const plugins = {
+  render: () => views?.plugins.render(),
 };
 
 app.init().catch((error) => {

@@ -189,6 +189,7 @@ ui/
   results.js          batches, provenance, copy and export
   gallery.js          saved and bundled .lpp presets
   studio.js           schema-driven .lap editor and preview
+  plugins.js          plugin list, local loading, panel mounting
   store.js            IndexedDB preset storage with fallback
   format.js           text/CSV export and CSV/text import helpers
   dom.js              small DOM helpers
@@ -202,6 +203,7 @@ core/
   slots.js            built-in slot resolvers and availability checks
   categories.js       built-in person/place/organization/domain specs
   schema.js           dependency-free JSON Schema subset validator
+  plugin-host.js      manifest gate, scoped registries, rollback, unload
   mix-strategies/
     weighted-lottery.js
     crossover.js      documented stub, deferred
@@ -212,9 +214,9 @@ core/
   renderers/plain.js
   phoneme-resolvers/romanization.js
   speakers/           interface only in v1; synthesis later
-ui/
-  app.js mixer.js gallery.js studio.js results.js
 plugins/
+  index.json
+  example-hooks/
 packs/
 presets/
 schemas/
@@ -236,7 +238,9 @@ registry.slotResolvers.register("root", fn);
 registry.phonemeResolvers.register("romanization", fn);
 registry.categories.register("person", spec);
 registry.importers.register("csv", fn);
+registry.exporters.register("markdown", fn);
 registry.validators.register("phonotactics", fn);
+registry.uiPanels.register("example.panel", fn);
 ```
 
 ### 4.2 Extension points
@@ -250,7 +254,9 @@ registry.validators.register("phonotactics", fn);
 | Prosody | `prosody({laps, weights, context}) -> prosody` | Interface only |
 | Slot resolver | `resolve({slot, lap, rng, state}) -> string` | Built-ins for the v1 slot vocabulary |
 | Category | spec describing templates, required slots, output shape | Person, place, organization, domain |
-| Importer | `import(file) -> Partial<Lap>` | CSV/text planned for Studio (M3) |
+| Importer | `import(file) -> Partial<Lap>` | Studio CSV/text import |
+| Exporter | `export(results) -> {filename, mime, text}` | Plugin exporters in the results toolbar |
+| UI panel | `mount(root, {app, notify, host})`, optional `unmount(root)` | Plugins tab |
 | Validator | `validate(name, context) -> warnings[]` | Phonotactics, dedupe |
 
 ### 4.3 Slot vocabulary v1
@@ -371,18 +377,29 @@ derived from blended articulatory features rather than a stock language voice.
 
 ## 7. Plug-ins and trust
 
-v1 scope: **data plus JS hooks**.
+v1 scope: **data plus JS hooks**, implemented in `core/plugin-host.js`.
 
-- Plug-ins are ES modules loaded with `import()`, either bundled, pasted by the user, or (in
-  the Tauri build) read from `plugins/`.
-- A manifest declares `apiVersion` and `capabilities`; the host refuses unknown API versions.
-- JS plug-ins are trusted code. This is documented explicitly; there is no sandbox in v1.
+- Bundled plugins are listed in `plugins/index.json`; the host fetches each manifest, resolves
+  the entry relative to it, and imports the module. Entry URLs carry the plugin version so a
+  reload picks up changes.
+- Local single-file `.js` plugins import through a temporary Blob URL after an explicit trust
+  confirmation. They must export their own `manifest`; relative imports do not work.
+- A manifest declares `apiVersion` and `capabilities`. The host accepts exactly API v1 and
+  rejects newer or older versions before calling `register()`.
+- Registration goes through a scoped registry that records every addition. A thrown
+  `register()` triggers a reverse rollback; registry collisions abort cleanly. Handles can be
+  unloaded later, which removes their registrations and unmounts their panels.
+- UI panels and result exporters are first-class extension points, so plugins can contribute
+  more than data.
+- JS plugins are trusted code with full page access. This is documented in the Plugins tab and
+  the API guide; there is no sandbox in v1.
 - Data-only packs/presets are inherently safe and remain the lowest-friction extension path.
-- Sandboxed WASM plug-ins are a possible future upgrade; they are not worth the v1 complexity.
+- Sandboxed WASM plugins are a possible future upgrade; they are not worth the v1 complexity.
 
 ## 8. UI surfaces
 
-Implemented in M3 as dependency-free ES modules. The app has no framework and no build step.
+Implemented in M3 and extended in M4 as dependency-free ES modules. The app has no framework
+and no build step.
 
 - **Mixer.** Add/remove LAPs, drag weights, per-category overrides, strategy and renderer
   selectors, `blendStrength` placeholder.
@@ -390,6 +407,8 @@ Implemented in M3 as dependency-free ES modules. The app has no framework and no
 - **Gallery.** Save/load/export `.lpp`, bundled presets, missing-pack warnings using `pins`.
 - **Studio.** Form generated from the JSON Schema, live preview, validation panel, CSV/text
   import, `.lap` export, and a concise research guide.
+- **Plugins.** Loaded plugin list with sources and capabilities, unload controls, the API
+  version, bundled/local loading, and mounted plugin panels.
 
 ## 9. Testing strategy
 
@@ -407,9 +426,12 @@ imports of the schemas.
 - Provenance completeness: every character and phoneme traceable to a source.
 - UI helpers: text and CSV export escaping, CSV/text import, root gloss merging, and
   preset availability/version summaries.
+- Plugin host: manifest validation, API-version rejection, duplicate registration, rollback,
+  unload, custom category generation, exporter output, and the example plugin end to end.
 - Browser smoke run (`tests/browser-smoke.mjs`): load packs, generate, inspect provenance,
   save and export a preset, reload and load it, edit a pack in the Studio, import entries,
-  export `.lap`, and add the pack to the mixer.
+  export `.lap`, add the pack to the mixer, run the plugin category and exporter, load a local
+  plugin, and reject a future API version.
 
 ## 10. Risks and mitigations
 

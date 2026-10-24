@@ -40,6 +40,7 @@ try {
   browser = await chromium.launch({ executablePath: chromePath, headless: true, args: ['--no-sandbox'] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, acceptDownloads: true });
   const page = await context.newPage();
+  page.on('dialog', (dialog) => dialog.accept());
   const errors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(`console: ${message.text()}`);
@@ -104,6 +105,62 @@ try {
 
   await page.click('#studio-add-mix');
   await page.waitForFunction(() => document.querySelectorAll('#mix-list .pack-card').length === 3);
+
+  await page.click('[data-tab="plugins"]');
+  await page.waitForSelector('#plugin-list .plugin-card');
+  assert.ok((await page.locator('#plugin-list').innerText()).includes('Example Hooks'));
+  assert.match(await page.locator('#plugin-api-version').innerText(), /API v1/i);
+  assert.ok((await page.locator('#plugin-panels').innerText()).includes('Example Hooks'));
+
+  await page.locator('#plugin-panels button', { hasText: 'Select Syllable chant' }).click();
+  await page.waitForSelector('#panel-workspace:not([hidden])');
+  assert.equal(await page.inputValue('#category-select'), 'syllable-chant');
+  await page.fill('#count-input', '5');
+  await page.click('#generate');
+  await page.waitForFunction(() => document.querySelectorAll('#results .result-card').length === 5);
+  const pluginNames = await page.locator('#results .result-card h3').allTextContents();
+  console.log('plugin category names:', pluginNames.join(' | '));
+
+  const markdownDownload = page.waitForEvent('download');
+  await page.locator('#plugin-exporters button', { hasText: 'Markdown' }).click();
+  assert.match((await markdownDownload).suggestedFilename(), /\.md$/);
+
+  const localPlugin = `
+export const manifest = {
+  format: 'dilstout.plugin', id: 'local-demo', name: 'Local Demo', version: '0.1.0',
+  apiVersion: 1, entry: 'local-demo.js', capabilities: ['uiPanel'],
+  description: 'Loaded from a local file during the smoke test.'
+};
+export function register({ registry }) {
+  registry.uiPanels.register('local-demo.panel', {
+    id: 'local-demo.panel', label: 'Local Demo',
+    mount(root) { root.textContent = 'Local plugin panel loaded.'; }
+  });
+}
+`;
+  await page.click('[data-tab="plugins"]');
+  await page.setInputFiles('#plugin-file', {
+    name: 'local-demo.js',
+    mimeType: 'text/javascript',
+    buffer: Buffer.from(localPlugin),
+  });
+  await page.waitForFunction(() => document.querySelector('#plugin-list').innerText.includes('Local Demo'));
+  assert.ok((await page.locator('#plugin-panels').innerText()).includes('Local plugin panel loaded.'));
+
+  const badPlugin = `
+export const manifest = {
+  format: 'dilstout.plugin', id: 'future-plugin', name: 'Future Plugin', version: '1.0.0',
+  apiVersion: 2, entry: 'future.js', capabilities: ['uiPanel']
+};
+export function register() {}
+`;
+  await page.setInputFiles('#plugin-file', {
+    name: 'future-plugin.js',
+    mimeType: 'text/javascript',
+    buffer: Buffer.from(badPlugin),
+  });
+  await page.waitForFunction(() => document.querySelector('#toast').innerText.includes('supports v1'));
+  assert.equal(await page.locator('#plugin-list .plugin-card').count(), 2);
 
   assert.deepEqual(errors, []);
   console.log(`browser smoke OK: ${names.join(' | ')}`);

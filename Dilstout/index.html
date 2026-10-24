@@ -32,6 +32,7 @@
       <button class="tab is-active" type="button" role="tab" id="tab-workspace" data-tab="workspace" aria-selected="true" aria-controls="panel-workspace">Mixer</button>
       <button class="tab" type="button" role="tab" id="tab-gallery" data-tab="gallery" aria-selected="false" aria-controls="panel-gallery">Gallery</button>
       <button class="tab" type="button" role="tab" id="tab-studio" data-tab="studio" aria-selected="false" aria-controls="panel-studio">LAP Studio</button>
+      <button class="tab" type="button" role="tab" id="tab-plugins" data-tab="plugins" aria-selected="false" aria-controls="panel-plugins">Plugins</button>
     </nav>
 
     <div class="topbar-meta">
@@ -127,6 +128,7 @@
               <button id="copy-all" class="button ghost" type="button">Copy</button>
               <button id="export-txt" class="button ghost" type="button">.txt</button>
               <button id="export-csv" class="button ghost" type="button">.csv</button>
+              <span id="plugin-exporters" class="plugin-exporters"></span>
             </div>
           </div>
 
@@ -286,6 +288,46 @@
             </div>
           </details>
         </aside>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="panel-plugins" role="tabpanel" aria-labelledby="tab-plugins" hidden>
+      <div class="plugins-layout">
+        <section class="panel">
+          <div class="panel-heading">
+            <span class="step-number">07</span>
+            <div>
+              <h2>Plugin host</h2>
+              <p>Extend slots, categories, exporters, and panels.</p>
+            </div>
+          </div>
+
+          <div class="trust-note">
+            <strong>Plugins are trusted code.</strong>
+            JavaScript plugins run with full access to this page and can make network requests.
+            Only load plugins you have reviewed. Data-only <code>.lap</code> packs and
+            <code>.lpp</code> presets are the safe extension path.
+          </div>
+
+          <div class="plugin-toolbar">
+            <label class="button subtle" for="plugin-file">Load plugin .js<input id="plugin-file" type="file" accept=".js,text/javascript"></label>
+            <button id="reload-plugins" class="button ghost" type="button">Load bundled</button>
+            <span id="plugin-api-version" class="chip">Plugin API v1</span>
+          </div>
+
+          <div id="plugin-list" class="plugin-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <span class="step-number">08</span>
+            <div>
+              <h2>Plugin panels</h2>
+              <p>This is where registered panels mount.</p>
+            </div>
+          </div>
+          <div id="plugin-panels" class="plugin-panels"></div>
+        </section>
       </div>
     </section>
   </main>

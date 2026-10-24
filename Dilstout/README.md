@@ -6,8 +6,9 @@ packs to produce person, place, organization, and domain names.
 Dilstout is part of [MiscoTools](../README.md). It follows the same house style as the other
 tools: no build step, no runtime dependencies, no telemetry, and everything local.
 
-> Status: Milestone 3 complete — browser mixer, results with provenance, preset gallery, and
-> the LAP Studio. 65 core, pack, and UI-helper tests, plus a headless Chrome smoke test.
+> Status: Milestone 4 complete — plugin host with bundled and local plugins, an example plugin
+> covering every extension point, and the browser UI. 72 core, pack, and UI-helper tests, plus
+> a headless Chrome smoke test.
 >
 > Future: a native embeddable SDK (C ABI + C++ wrapper, later Python/WASM) is planned as M8,
 > after all current milestones. See [the roadmap](docs/ROADMAP.md).
@@ -30,7 +31,9 @@ so a 50/50 Babylonian/Aztec blend is a first-class operation rather than a novel
 - **LAP Studio** — schema-driven editor for authoring packs, with a short guide on how to
   research a culture and where to collect the data.
 - **Extensible by design** — mixing strategies, renderers, slot resolvers, categories,
-  importers, and (later) speakers are registered through a plug-in API.
+  exporters, UI panels, importers, and (later) speakers are registered through a versioned
+  plugin API. Bundled plugins load automatically; local single-file `.js` plugins load after
+  a trust confirmation.
 - **Portable** — static web app with no backend; serve the folder from any static host, a
   `python3 -m http.server`, or the planned optional Tauri wrapper. No install and no telemetry.
 
@@ -44,7 +47,11 @@ python3 -m http.server 8000
 Open <http://localhost:8000/>. Add or open packs in the Mixer, set weights and per-category
 overrides, then generate. Results keep per-name provenance and phonemes. The Gallery saves
 mixes to this browser as `.lpp` presets and exports them as files. The LAP Studio edits a pack
-through a schema-driven form with live validation and preview.
+through a schema-driven form with live validation and preview. The Plugins tab lists loaded
+plugins, mounts their panels, and can load a local `.js` plugin after a confirmation.
+
+The bundled `plugins/example-hooks` adds a syllable slot, a Syllable chant category, a
+Markdown exporter, and a demo panel.
 
 ## Bundled packs
 
@@ -68,7 +75,7 @@ Dilstout/
   sw.js
   core/            # RNG, engine, mixing, validation, morphology (UI-agnostic)
   ui/              # mixer, gallery, studio, results
-  plugins/         # example plug-ins
+  plugins/         # bundled plugins, index.json, example-hooks demo
   packs/           # bundled .lap files
   presets/         # bundled .lpp files
   schemas/         # JSON Schemas for .lap, .lpp, plug-in manifests
@@ -98,7 +105,7 @@ modules.
 
 ```sh
 cd Dilstout
-node --test                 # 65 core, pack, and UI-helper tests
+node --test                 # 72 core, pack, UI-helper, and plugin-host tests
 python3 -m http.server 8000 # serve the app during development
 ```
 

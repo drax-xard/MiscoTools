@@ -100,13 +100,17 @@ generation, provenance, preset save/export/reload/load, and the Studio edit/impo
 
 ## M4 — Plug-in host
 
-**Status:** planned
+**Status:** done
 
-- [ ] Manifest loading and `apiVersion` gate.
-- [ ] `plugins/` example plugin exercising a custom slot, a custom exporter, and a UI panel.
-- [ ] `docs/plugin-api.md` completed with a worked example.
-- [ ] Trust model documented in the UI at the point of loading a JS plug-in.
-- [ ] Tests for registry collisions and API-version rejection.
+Verified by `tests/plugin-host.test.js` and the browser smoke run: bundled loading, local file
+loading, API-version rejection, rollback, collisions, unload, custom category generation,
+Markdown export, and panel mounting.
+
+- [x] Manifest loading and `apiVersion` gate.
+- [x] `plugins/` example plugin exercising a custom slot, a custom exporter, and a UI panel.
+- [x] `docs/plugin-api.md` completed with a worked example.
+- [x] Trust model documented in the UI at the point of loading a JS plug-in.
+- [x] Tests for registry collisions and API-version rejection.
 
 ## M5 — Voice prototype
 
