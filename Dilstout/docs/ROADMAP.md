@@ -1,0 +1,157 @@
+# Dilstout — Roadmap
+
+Milestones are sequential. Each one ends with passing tests and a short note in the
+changelog. Scope is intentionally small per milestone so the engine is proven before UI and
+audio work begins.
+
+Status legend: `planned` · `in progress` · `done`
+
+## M0 — Design (done)
+
+- [x] Requirements captured and clarified.
+- [x] Runtime and language evaluated.
+- [x] Formats and architecture decided.
+- [x] Voice approach evaluated.
+- [x] README, design document, roadmap written.
+
+## M1 — Scaffold and core engine
+
+**Status:** planned
+
+No UI. No build step. No dependencies. Runnable with `node --test`.
+
+### Deliverables
+
+| File | Purpose |
+|---|---|
+| `schemas/lap.schema.json` | v1 `.lap` schema: `meta`, `phonology` (inventory with articulatory features, romanization→IPA, prosody, join rules), `lexicon`, `person`, `place`, `organization`, `domain`, `weights`, `voice`. |
+| `schemas/lpp.schema.json` | `.lpp` preset schema: packs + weights/overrides, seed, strategy, renderer, reserved `blendStrength`, pack-version `pins`. |
+| `schemas/plugin-manifest.schema.json` | Plug-in manifest with `apiVersion` and `capabilities`. |
+| `core/rng.js` | Seeded mulberry32; shareable seed codes. |
+| `core/registry.js` | Registries for mix strategies, renderers, speakers, prosody, slot resolvers, phoneme resolvers, categories, importers, validators. |
+| `core/lap.js` | Load, validate, normalize, migrate `.lap`. |
+| `core/preset.js` | `serializeLpp`, `parseLpp`, `presetHash`; lossless round-trip. |
+| `core/mixer.js` | Active pack set, normalized weights, per-category overrides. |
+| `core/mix-strategies/weighted-lottery.js` | v1 strategy. |
+| `core/mix-strategies/crossover.js` | Documented stub fixing the contract. |
+| `core/mix-strategies/strand-blend.js` | Documented stub fixing the contract. |
+| `core/morphology.js` | Data-driven join rules: elision, harmony, assimilation, spacing/hyphen/case. |
+| `core/validate.js` | Phonotactic checks, retry/relax loop, warnings. |
+| `core/engine.js` | Generation pipeline and result contract. |
+| `core/renderers/plain.js` | ASCII-safe romanized renderer. |
+| `core/speakers/` | Interface and documentation only; no synthesis. |
+| `packs/test-synthetic.lap` | Exercises every slot, rule, and phoneme field. |
+| `tests/*.test.js` | Full core test suite. |
+| `docs/lap-authoring-guide.md` | Research checklist, IPA and transliteration conventions, licensing and ethics. |
+| `docs/plugin-api.md` | Extension points and trusted-code model. |
+
+### Frozen contracts
+
+```js
+selectSource({ category, slot, laps, rng, state }) -> lapId
+resolvePhonemes({ text, lapId, context }) -> [{ symbol, features, lapId }]
+render({ parts, lapId, style }) -> string
+speak({ phonemes, prosody, voice }) -> Promise<void>   // interface only
+generate({ laps, preset, category, count, seed })
+  -> [{ name, phonemes, category, seed, provenance, warnings }]
+```
+
+### Acceptance criteria
+
+- [ ] `.lpp` save/load is lossless: weights, overrides, seed, strategy, renderer, and pins.
+- [ ] Same `.lpp` + seed + pack versions produce byte-identical output.
+- [ ] No `Math.random()` in `core/`; all draws use the injected RNG.
+- [ ] 1,000 generated names contain no `{slot}`, `null`, or `undefined`.
+- [ ] Batch count and dedupe respected.
+- [ ] Lottery distribution within ±2% of configured weights over 10,000 draws.
+- [ ] Every output phoneme and every rendered character is traceable to a source pack/slot.
+- [ ] Phoneme, prosody, and `voice` fields validate and survive a `.lpp` round-trip.
+- [ ] `node --test` passes with zero dependencies.
+
+## M2 — Starter language packs
+
+**Status:** planned
+
+- [ ] `packs/ancient-babylonian.lap` with sources, license, IPA inventory, romanization map, and prosody.
+- [ ] `packs/aztec.lap` with the same depth (Nahuatl naming conventions).
+- [ ] Category templates cover person, place, organization, and all six domain types.
+- [ ] Every declared slot resolves in both packs.
+- [ ] Every template validates and generates at least 100 unique names per category.
+- [ ] Pack-quality checklist added to the authoring guide and applied to both packs.
+
+## M3 — Web UI, Gallery, Studio
+
+**Status:** planned
+
+- [ ] `index.html`, `ui/app.js`, `ui/mixer.js`, `ui/results.js`, `ui/gallery.js`, `ui/studio.js`.
+- [ ] Mixer: add/remove packs, weight sliders, per-category overrides, strategy and renderer selectors.
+- [ ] Results: batch size, copy, CSV/text export, provenance detail.
+- [ ] Gallery: save/load/export `.lpp`, bundled presets, missing-pack warnings from `pins`.
+- [ ] Studio: schema-generated form, live preview, validation panel, CSV/text import, `.lap` export.
+- [ ] Responsive layout consistent with LlamaTune and B-BOT Lite.
+- [ ] Browser smoke test for load → mix → generate → save preset → reload.
+
+## M4 — Plug-in host
+
+**Status:** planned
+
+- [ ] Manifest loading and `apiVersion` gate.
+- [ ] `plugins/` example plugin exercising a custom slot, a custom exporter, and a UI panel.
+- [ ] `docs/plugin-api.md` completed with a worked example.
+- [ ] Trust model documented in the UI at the point of loading a JS plug-in.
+- [ ] Tests for registry collisions and API-version rejection.
+
+## M5 — Voice prototype
+
+**Status:** planned
+
+- [ ] `core/speakers/prosody.js`: weighted interpolation of tempo, pitch, vowel length, stress bias.
+- [ ] Web Speech speaker behind the `speak()` interface for a cheap concept check.
+- [ ] Evaluate intelligibility and whether interpolation is audible.
+- [ ] Decision note: proceed with formant synthesizer, adjust, or stop.
+
+## M6 — Formant synthesizer
+
+**Status:** planned
+
+- [ ] Klatt-style formant speaker driven by articulatory features from `.lap` inventories.
+- [ ] Phoneme realization uses provenance, so audio matches the written name.
+- [ ] `blendStrength` from 0 to 1 controls hybrid accent intensity.
+- [ ] Optional eSpeak-NG WASM plug-in (documented license implications).
+- [ ] Optional cloud TTS plug-in.
+- [ ] Accuracy fixtures: phoneme → formant parameter snapshots.
+
+## M7 — Optional desktop packaging
+
+**Status:** planned
+
+- [ ] Tauri wrapper reusing the static UI.
+- [ ] Native open/save dialogs for `.lap` and `.lpp`, file associations.
+- [ ] Load plug-ins from an on-disk `plugins/` folder.
+- [ ] Reproducible builds for Linux, macOS, and Windows.
+
+## Backlog and future ideas
+
+- Additional packs (Norse, Ancient Greek, Sumerian, Quechua, Yoruba, etc.).
+- Additional mix strategies: template crossover, strand blend, "chaos" mode.
+- Renderer plug-ins: diacritics, native scripts, RTL and CJK.
+- Name meaning/gloss generation from lexicon data.
+- Family trees and dynasties: generate related names with shared morphemes.
+- Maps: place names positioned on a generated region.
+- Importers for onomastic datasets and Wikipedia tables.
+- Share links with embedded preset and seed (URL fragment).
+- CLI (`node bin/dilstout.js`) sharing the same core.
+- WASM-sandboxed plug-ins.
+- Localization of the UI itself.
+- Accessibility pass: keyboard mixing, screen-reader labels for generated names.
+
+## Open decisions
+
+| Question | Current stance |
+|---|---|
+| Project license | Undecided; must be settled before shipping bundled packs. |
+| Bundled pack licensing | Per-pack `license` and `sources`; only redistributable sources. |
+| Native script support | Deferred to a renderer plug-in; v1 is romanized only. |
+| UI framework | None; vanilla ES modules. Revisit only if complexity demands it. |
+| Whether to ship a CLI with v1 | Not planned; core is already Node-runnable. |
+| Tauri timeline | After the plugin host and voice work; not a v1 blocker. |
