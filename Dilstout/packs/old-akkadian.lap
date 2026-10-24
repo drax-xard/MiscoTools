@@ -1,0 +1,762 @@
+{
+  "format": "dilstout.lap",
+  "version": 1,
+  "meta": {
+    "id": "old-akkadian",
+    "name": "Old Akkadian (Sargonic)",
+    "culture": "Akkadian (Old Akkadian / Sargonic)",
+    "era": "c. 2334-2154 BCE",
+    "author": "AI-assisted research draft (unreviewed)",
+    "license": "CC0-1.0 for the original compilation; cited sources retain their own rights. Verify before redistribution.",
+    "sources": [
+      "Frayne, D. R. (1993). Sargonic and Gutian Periods (2334-2113 BC). Royal Inscriptions of Mesopotamia, Early Periods 2. University of Toronto Press.",
+      "Gelb, I. J. (1961). Old Akkadian Writing and Grammar (2nd ed.). Materials for the Assyrian Dictionary 2. University of Chicago Press.",
+      "Huehnergard, J. (2011). A Grammar of Akkadian (3rd ed.). Harvard Semitic Studies 45. Eisenbrauns.",
+      "Black, J., George, A., & Postgate, N. (2000). A Concise Dictionary of Akkadian (2nd ed.). Santag 5. Harrassowitz.",
+      "Foster, B. R. (2016). The Age of Agade: Inventing Empire in Ancient Mesopotamia. Routledge.",
+      "Sallaberger, W., & Westenholz, A. (1999). Mesopotamien: Akkade-Zeit und Ur III-Zeit. Orbis Biblicus et Orientalis 160/3. Universitaetsverlag Freiburg / Vandenhoeck & Ruprecht.",
+      "Oppenheim, A. L., et al. (eds.). (1956-2010). The Assyrian Dictionary of the Oriental Institute of the University of Chicago (CAD). 26 vols. Oriental Institute."
+    ],
+    "notes": "Scope: Old Akkadian (Sargonic) as attested in royal and administrative texts of the Akkadian Empire, c. 2334-2154 BCE, central Mesopotamia. Romanization: ASCII-friendly Akkadological transliteration; sh = s with hachek, kh = h with breve, ts = s with dot below, q = q; emphatic t is merged with t and vowel length is not marked in generated forms. Stress is reconstructed; exact Old Akkadian stress is not directly recorded. Given names include attested royal and elite names plus explicitly derived theophoric patterns. Glottal stop and pharyngeals are not represented because cuneiform does not mark them consistently in this corpus. Deity names are used only as theophoric elements in personal names, following attested practice; they are not used as standalone given names or generic place elements. Place, organization, and domain templates are extrapolated from attested vocabulary and naming conventions; they are not quoted toponyms or titles. Models naming patterns, not fluent Akkadian. Experimental; not reviewed by a specialist.",
+    "status": "experimental"
+  },
+  "phonology": {
+    "inventory": [
+      {
+        "symbol": "p",
+        "type": "consonant",
+        "place": "bilabial",
+        "manner": "stop",
+        "voicing": "voiceless"
+      },
+      {
+        "symbol": "b",
+        "type": "consonant",
+        "place": "bilabial",
+        "manner": "stop",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "t",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "stop",
+        "voicing": "voiceless",
+        "notes": "Covers t and emphatic t, which are merged in this ASCII romanization."
+      },
+      {
+        "symbol": "d",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "stop",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "k",
+        "type": "consonant",
+        "place": "velar",
+        "manner": "stop",
+        "voicing": "voiceless"
+      },
+      {
+        "symbol": "g",
+        "type": "consonant",
+        "place": "velar",
+        "manner": "stop",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "q",
+        "type": "consonant",
+        "place": "uvular",
+        "manner": "stop",
+        "voicing": "voiceless",
+        "notes": "Emphatic k."
+      },
+      {
+        "symbol": "ts",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "affricate",
+        "voicing": "voiceless",
+        "notes": "ASCII representation of emphatic s."
+      },
+      {
+        "symbol": "s",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "fricative",
+        "voicing": "voiceless"
+      },
+      {
+        "symbol": "ʃ",
+        "type": "consonant",
+        "place": "postalveolar",
+        "manner": "fricative",
+        "voicing": "voiceless",
+        "notes": "Written sh; also covers the Old Akkadian reflex of Proto-Semitic s with acute."
+      },
+      {
+        "symbol": "x",
+        "type": "consonant",
+        "place": "velar",
+        "manner": "fricative",
+        "voicing": "voiceless",
+        "notes": "Written kh; Akkadian h with breve."
+      },
+      {
+        "symbol": "h",
+        "type": "consonant",
+        "place": "glottal",
+        "manner": "fricative",
+        "voicing": "voiceless"
+      },
+      {
+        "symbol": "m",
+        "type": "consonant",
+        "place": "bilabial",
+        "manner": "nasal",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "n",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "nasal",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "l",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "lateral",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "r",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "trill",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "w",
+        "type": "consonant",
+        "place": "labiovelar",
+        "manner": "approximant",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "j",
+        "type": "consonant",
+        "place": "palatal",
+        "manner": "approximant",
+        "voicing": "voiced",
+        "notes": "Written y."
+      },
+      {
+        "symbol": "z",
+        "type": "consonant",
+        "place": "alveolar",
+        "manner": "fricative",
+        "voicing": "voiced"
+      },
+      {
+        "symbol": "a",
+        "type": "vowel",
+        "height": "open",
+        "backness": "central",
+        "rounded": false,
+        "length": "short"
+      },
+      {
+        "symbol": "e",
+        "type": "vowel",
+        "height": "mid",
+        "backness": "front",
+        "rounded": false,
+        "length": "short"
+      },
+      {
+        "symbol": "i",
+        "type": "vowel",
+        "height": "close",
+        "backness": "front",
+        "rounded": false,
+        "length": "short"
+      },
+      {
+        "symbol": "u",
+        "type": "vowel",
+        "height": "close",
+        "backness": "back",
+        "rounded": true,
+        "length": "short"
+      },
+      {
+        "symbol": "aː",
+        "type": "vowel",
+        "height": "open",
+        "backness": "central",
+        "rounded": false,
+        "length": "long"
+      },
+      {
+        "symbol": "eː",
+        "type": "vowel",
+        "height": "mid",
+        "backness": "front",
+        "rounded": false,
+        "length": "long"
+      },
+      {
+        "symbol": "iː",
+        "type": "vowel",
+        "height": "close",
+        "backness": "front",
+        "rounded": false,
+        "length": "long"
+      },
+      {
+        "symbol": "uː",
+        "type": "vowel",
+        "height": "close",
+        "backness": "back",
+        "rounded": true,
+        "length": "long"
+      }
+    ],
+    "romanization": {
+      "a": "a",
+      "b": "b",
+      "d": "d",
+      "e": "e",
+      "g": "g",
+      "h": "h",
+      "i": "i",
+      "k": "k",
+      "kh": "x",
+      "l": "l",
+      "m": "m",
+      "n": "n",
+      "p": "p",
+      "q": "q",
+      "r": "r",
+      "s": "s",
+      "sh": "ʃ",
+      "t": "t",
+      "ts": "ts",
+      "u": "u",
+      "w": "w",
+      "y": "j",
+      "z": "z",
+      "ā": "aː",
+      "ē": "eː",
+      "ī": "iː",
+      "ū": "uː"
+    },
+    "phonotactics": {
+      "onsets": [
+        "p",
+        "b",
+        "t",
+        "d",
+        "k",
+        "g",
+        "q",
+        "m",
+        "n",
+        "l",
+        "r",
+        "s",
+        "ʃ",
+        "x",
+        "h",
+        "w",
+        "j",
+        "z",
+        "ts"
+      ],
+      "nuclei": [
+        "a",
+        "e",
+        "i",
+        "u",
+        "aː",
+        "eː",
+        "iː",
+        "uː"
+      ],
+      "codas": [
+        "m",
+        "n",
+        "l",
+        "r",
+        "s",
+        "ʃ",
+        "x",
+        "k",
+        "b",
+        "d",
+        "t",
+        "q"
+      ],
+      "notes": "Old Akkadian permitted a range of consonant clusters; v1 does not enforce a full syllabifier."
+    },
+    "prosody": {
+      "stress": "penultimate",
+      "syllableTemplate": "(C)V(C)",
+      "tempo": 1,
+      "vowelLengthDistinctive": true,
+      "tone": null
+    },
+    "joinRules": [
+      {
+        "type": "dropDuplicate"
+      },
+      {
+        "type": "elideVowel",
+        "from": "a",
+        "to": "",
+        "when": "beforeVowel"
+      },
+      {
+        "type": "elideVowel",
+        "from": "i",
+        "to": "",
+        "when": "beforeVowel"
+      },
+      {
+        "type": "elideVowel",
+        "from": "u",
+        "to": "",
+        "when": "beforeVowel"
+      },
+      {
+        "type": "assimilate",
+        "from": "n",
+        "to": "m",
+        "before": [
+          "b",
+          "p",
+          "m"
+        ]
+      }
+    ]
+  },
+  "lexicon": {
+    "roots": {
+      "al": [
+        "city"
+      ],
+      "bit": [
+        "house",
+        "estate"
+      ],
+      "nar": [
+        "river"
+      ],
+      "shad": [
+        "mountain"
+      ],
+      "eqel": [
+        "field"
+      ],
+      "kir": [
+        "garden",
+        "orchard"
+      ],
+      "bab": [
+        "gate"
+      ],
+      "ekall": [
+        "palace"
+      ],
+      "tamkar": [
+        "merchant"
+      ],
+      "tsab": [
+        "army"
+      ],
+      "qurad": [
+        "warrior"
+      ],
+      "dur": [
+        "fort",
+        "wall"
+      ],
+      "kar": [
+        "harbor",
+        "merchant quarter"
+      ],
+      "ummian": [
+        "craftsman"
+      ],
+      "naggar": [
+        "carpenter"
+      ],
+      "pahir": [
+        "potter"
+      ],
+      "parakk": [
+        "sanctuary"
+      ],
+      "shang": [
+        "priest"
+      ],
+      "ent": [
+        "high priestess"
+      ],
+      "nadit": [
+        "priestess"
+      ],
+      "aship": [
+        "exorcist"
+      ],
+      "bar": [
+        "diviner"
+      ],
+      "shakkanakk": [
+        "governor"
+      ],
+      "pahat": [
+        "province"
+      ],
+      "hals": [
+        "district"
+      ],
+      "rab": [
+        "great"
+      ],
+      "dann": [
+        "strong"
+      ],
+      "emq": [
+        "wise"
+      ],
+      "tsir": [
+        "exalted"
+      ],
+      "nur": [
+        "light"
+      ],
+      "dam": [
+        "blood"
+      ],
+      "awil": [
+        "man"
+      ],
+      "ward": [
+        "servant"
+      ],
+      "amt": [
+        "female servant"
+      ],
+      "mar": [
+        "son"
+      ],
+      "apl": [
+        "heir"
+      ],
+      "napish": [
+        "life"
+      ],
+      "il": [
+        "god"
+      ],
+      "kakk": [
+        "weapon"
+      ],
+      "temenn": [
+        "foundation"
+      ],
+      "kapr": [
+        "village"
+      ],
+      "kisall": [
+        "courtyard"
+      ],
+      "shum": [
+        "name"
+      ],
+      "sham": [
+        "heaven",
+        "sky"
+      ],
+      "kibr": [
+        "quarter",
+        "world region"
+      ],
+      "ekur": [
+        "temple"
+      ]
+    },
+    "prefixes": [
+      "ili",
+      "puzur",
+      "warad",
+      "amat",
+      "shamash",
+      "sin",
+      "ishtar",
+      "enlil",
+      "ea",
+      "anu",
+      "adad",
+      "nergal",
+      "dagan",
+      "nanna",
+      "utu",
+      "inanna",
+      "aya",
+      "ninhursag",
+      "sharru",
+      "naram",
+      "bel",
+      "belt"
+    ],
+    "suffixes": [
+      "kin",
+      "iddin",
+      "muballit",
+      "nasir",
+      "ibni",
+      "ushur",
+      "nadin",
+      "shuma",
+      "aplu",
+      "rabi",
+      "beli",
+      "tukulti",
+      "ilum",
+      "sharrum",
+      "nurum",
+      "dannum",
+      "tsirum",
+      "emqum",
+      "quradum",
+      "wardum",
+      "amtum",
+      "marum",
+      "aplum",
+      "napishum",
+      "shamum",
+      "kibrum",
+      "matum",
+      "alum"
+    ],
+    "epithets": [
+      "dannum",
+      "emqum",
+      "tsirum",
+      "rabum"
+    ],
+    "honorifics": [
+      "sharrum",
+      "rubum",
+      "shangum",
+      "naditum",
+      "ashipum",
+      "shakkanakkum",
+      "entum",
+      "belum",
+      "beltum"
+    ],
+    "numerals": [
+      "ishten",
+      "shena",
+      "shalash"
+    ],
+    "articles": []
+  },
+  "person": {
+    "given": {
+      "male": [
+        "sharru-kin",
+        "rimush",
+        "manishtushu",
+        "naram-sin",
+        "shar-kali-sharri",
+        "dudu",
+        "shu-turul",
+        "shu-enlil",
+        "ilaba-ishtakal",
+        "ukin-ulmash",
+        "nabi-ulmash",
+        "lipit-ili",
+        "bin-kali-sharri",
+        "sharatigubishin",
+        "iphur-kish",
+        "karsum",
+        "ili-ishmani",
+        "puzur-sin",
+        "warad-sin",
+        "ili-iddin",
+        "shamash-rabi",
+        "enlil-nasir"
+      ],
+      "female": [
+        "enheduanna",
+        "tashlultum",
+        "taram-agade",
+        "enmenana",
+        "shumshani",
+        "tutanabshum",
+        "lipus-ia-um",
+        "amat-sin",
+        "amat-ishtar",
+        "amat-shamash",
+        "beltum",
+        "sharratum"
+      ],
+      "neutral": [
+        "shamash-kin",
+        "ilum-kin",
+        "nur-shamash",
+        "sharrum-kin",
+        "naram-ishtar"
+      ]
+    },
+    "templates": [
+      "{given}",
+      "{honorific} {given}",
+      "{given} {epithet}",
+      "{prefix}-{root}",
+      "{root}-{suffix}",
+      "{prefix}-{root}-{suffix}"
+    ],
+    "surnamePatterns": [],
+    "order": "given-only",
+    "clan": [],
+    "patronymic": "Patronymics are expressed with mar + personal name in the sources; v1 does not model a patronymic slot.",
+    "gendered": true
+  },
+  "place": {
+    "templates": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{directional}-{root}",
+      "{settlementType} {root}",
+      "{root} {settlementType}"
+    ],
+    "settlementTypes": [
+      "alum",
+      "kaprum",
+      "durum",
+      "bitum",
+      "karum",
+      "temennum"
+    ],
+    "settlementSuffixes": [
+      "um",
+      "u",
+      "a",
+      "i",
+      "ak",
+      "anum",
+      "itum",
+      "at"
+    ],
+    "terrainMorphemes": [
+      "nar",
+      "shad",
+      "eqel",
+      "kir",
+      "bab",
+      "kisall",
+      "temenn",
+      "kapr",
+      "hals",
+      "kibr"
+    ],
+    "directionalAffixes": [
+      "ereb",
+      "tsit",
+      "elum",
+      "shapal",
+      "qerbum"
+    ]
+  },
+  "organization": {
+    "religious": [
+      "Ekur {root}",
+      "{root} Ekur",
+      "Bit {root}",
+      "Parakkum {root}",
+      "Shangum {root}"
+    ],
+    "political": [
+      "Ekallum {root}",
+      "{root} Ekallum",
+      "Sharrum {root}",
+      "Shakkanakkum {root}"
+    ],
+    "military": [
+      "Tsabum {root}",
+      "{root} Tsabum",
+      "Quradum {root}",
+      "Durum {root}"
+    ],
+    "guild": [
+      "Karum {root}",
+      "{root} Karum",
+      "Tamkarum {root}",
+      "Ummianum {root}",
+      "Naggarum {root}"
+    ]
+  },
+  "domain": {
+    "nation": [
+      "Matum {root}",
+      "{root} Matum",
+      "Matum Rabum {root}"
+    ],
+    "kingdom": [
+      "Sharrum {root}",
+      "{root} Sharrum",
+      "Sharrum Rabum {root}"
+    ],
+    "empire": [
+      "Sharrum Rabum {root}",
+      "{root} Sharrum Rabum",
+      "Sharrum {root} Rabum"
+    ],
+    "province": [
+      "Pahatum {root}",
+      "{root} Pahatum",
+      "Pahatum Rabum {root}"
+    ],
+    "district": [
+      "{directional} Halsum",
+      "Halsum {root}",
+      "{root} Halsum",
+      "{directional}-{root} Halsum"
+    ],
+    "town": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{directional}-{root}",
+      "{settlementType} {root}",
+      "{root} {settlementType}"
+    ]
+  },
+  "weights": {
+    "componentWeights": {
+      "root": 1,
+      "given": 1,
+      "prefix": 1,
+      "suffix": 1
+    },
+    "categoryBias": {
+      "person": 1,
+      "place": 1,
+      "organization": 1,
+      "domain": 1
+    }
+  },
+  "voice": {
+    "preferredSpeaker": "formant",
+    "basePitch": 110,
+    "rate": 1
+  }
+}
