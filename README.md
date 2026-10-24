@@ -14,7 +14,7 @@ Always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses 
 
 ### [Dilstout](Dilstout/README.md)
 
-A portable, offline random name generator that mixes real language packs to create person, place, organization, and domain names. Packs define phonology, morphology, and naming conventions; the mixer blends them with per-category weights and saves mixes as `.lpp` presets. No build step or dependencies.
+A portable, offline random name generator that mixes real language packs to create person, place, organization, and domain names. Packs define phonology, morphology, and naming conventions; the mixer blends them with per-category weights and saves mixes as `.lpp` presets. Ships with Ancient Babylonian and Aztec starter packs. No build step or dependencies.
 
 ### [GitView](GitView/README.md)
 

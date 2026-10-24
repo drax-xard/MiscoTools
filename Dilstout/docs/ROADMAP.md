@@ -19,7 +19,7 @@ Status legend: `planned` · `in progress` · `done`
 **Status:** done
 
 No UI. No build step. No dependencies. Runnable with `node --test` (Node 22.14+ for JSON
-module imports). Verified with 49 passing tests.
+module imports). Verified with its 49 tests, included in the current 58-test suite.
 
 ### Deliverables
 
@@ -71,14 +71,17 @@ generate({ laps, preset, category, count, seed })
 
 ## M2 — Starter language packs
 
-**Status:** planned
+**Status:** done
 
-- [ ] `packs/ancient-babylonian.lap` with sources, license, IPA inventory, romanization map, and prosody.
-- [ ] `packs/aztec.lap` with the same depth (Nahuatl naming conventions).
-- [ ] Category templates cover person, place, organization, and all six domain types.
-- [ ] Every declared slot resolves in both packs.
-- [ ] Every template validates and generates at least 100 unique names per category.
-- [ ] Pack-quality checklist added to the authoring guide and applied to both packs.
+Verified by `tests/packs.test.js`: both packs load, contain no out-of-inventory symbols,
+declare only resolvable slots, and produce 100 unique warning-free names per category.
+
+- [x] `packs/ancient-babylonian.lap` with sources, license, IPA inventory, romanization map, and prosody.
+- [x] `packs/aztec.lap` with the same depth (Nahuatl naming conventions).
+- [x] Category templates cover person, place, organization, and all six domain types.
+- [x] Every declared slot resolves in both packs.
+- [x] Every template validates and generates at least 100 unique names per category.
+- [x] Pack-quality checklist added to the authoring guide and applied to both packs.
 
 ## M3 — Web UI, Gallery, Studio
 

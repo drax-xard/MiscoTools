@@ -21,7 +21,10 @@ Versions are project-wide: a release covers every tool in the collection.
   - Pluggable registries for mix strategies, renderers, speakers, prosody, slot and
     phoneme resolvers, categories, importers, and validators, with deferred strategy
     stubs for template crossover and strand blending.
-  - Synthetic test pack and bundled `.lpp` example; 49 core tests.
+  - Ancient Babylonian (Akkadian) and Aztec (Nahuatl) starter packs with IPA inventories,
+    ASCII romanization, prosody, join rules, sources, and experimental status.
+  - Synthetic test pack, a 50/50 Babylonian/Aztec preset, and a bundled single-pack
+    `.lpp` example; 58 core and pack tests.
 - **LlamaTune** — PrismML ternary quantization options (`PTQ1_0` and `PQ2_0`) in the
   picker, weight estimates, GGUF auto-detection (tensor types 142/143 and file types
   141/143), generated model filenames, and a PrismML runtime warning.

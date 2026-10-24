@@ -6,8 +6,8 @@ packs to produce person, place, organization, and domain names.
 Dilstout is part of [MiscoTools](../README.md). It follows the same house style as the other
 tools: no build step, no runtime dependencies, no telemetry, and everything local.
 
-> Status: Milestone 1 complete — schemas, seeded engine, `.lpp` presets, weighted mixing,
-> provenance, and 49 passing tests. The UI and starter packs are next.
+> Status: Milestone 2 complete — core engine, `.lap`/`.lpp` formats, and the Ancient
+> Babylonian and Aztec starter packs. 58 passing tests. The web UI and LAP Studio are next.
 >
 > Future: a native embeddable SDK (C ABI + C++ wrapper, later Python/WASM) is planned as M8,
 > after all current milestones. See [the roadmap](docs/ROADMAP.md).
@@ -33,6 +33,19 @@ so a 50/50 Babylonian/Aztec blend is a first-class operation rather than a novel
   importers, and (later) speakers are registered through a plug-in API.
 - **Portable** — static web app, offline-capable PWA, no server required. An optional Tauri
   wrapper is planned for desktop file associations and loading plug-ins from disk.
+
+## Bundled packs
+
+| Pack | Culture | Status |
+|---|---|---|
+| `packs/ancient-babylonian.lap` | Akkadian / Old Babylonian | experimental |
+| `packs/aztec.lap` | Nahua / Mexica (Classical Nahuatl) | experimental |
+| `packs/test-synthetic.lap` | Invented engine fixture | test only |
+
+Both real packs include IPA inventories, ASCII romanization tables, prosody, join rules,
+sources, and a license note. They model naming patterns, not fluent language, and are marked
+experimental until a specialist reviews them. `presets/babylonian-aztec-50-50.lpp` is the
+reference mixed preset.
 
 ## Planned layout
 
@@ -72,7 +85,7 @@ loaded as JSON modules.
 
 ```sh
 cd Dilstout
-node --test                 # 49 core tests
+node --test                 # 58 core and pack tests
 python3 -m http.server 8000 # serve the app during development
 ```
 
@@ -80,17 +93,14 @@ Generate names from the core directly:
 
 ```js
 import { readFileSync } from 'node:fs';
-import { loadLap, generate, createPreset, serializeLpp } from './core/index.js';
+import { loadLap, parseLpp, generate } from './core/index.js';
 
-const babylonian = loadLap(readFileSync('packs/test-synthetic.lap', 'utf8'));
-const preset = createPreset({
-  name: 'Solo mix',
-  laps: [{ id: babylonian.meta.id, weight: 1 }],
-  seed: 'dilstout-7f3a',
-});
+const packs = ['ancient-babylonian', 'aztec'].map((id) =>
+  loadLap(readFileSync(`packs/${id}.lap`, 'utf8')),
+);
+const preset = parseLpp(readFileSync('presets/babylonian-aztec-50-50.lpp', 'utf8'));
 
-console.log(serializeLpp(preset));
-console.log(generate({ laps: [babylonian], preset, category: 'person', count: 5 }));
+console.log(generate({ laps: packs, preset, category: 'person', count: 5 }));
 ```
 
 See the [authoring guide](docs/lap-authoring-guide.md) and
@@ -98,4 +108,4 @@ See the [authoring guide](docs/lap-authoring-guide.md) and
 
 ## License
 
-Not yet decided. Bundled packs will carry their own `license` and `sources` fields.
+Not yet decided. Bundled packs carry their own `license` and `sources` fields.

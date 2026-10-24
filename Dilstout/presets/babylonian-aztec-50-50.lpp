@@ -1,0 +1,26 @@
+{
+  "format": "dilstout.lpp",
+  "version": 1,
+  "name": "Babylonian / Aztec 50-50",
+  "description": "Even blend of the two starter packs. The reference example from the design document.",
+  "laps": [
+    {
+      "id": "ancient-babylonian",
+      "weight": 0.5,
+      "overrides": {}
+    },
+    {
+      "id": "aztec",
+      "weight": 0.5,
+      "overrides": {}
+    }
+  ],
+  "seed": "dilstout-7f3a",
+  "strategy": "weighted-lottery",
+  "renderer": "plain",
+  "blendStrength": 0.5,
+  "pins": {
+    "ancient-babylonian": 1,
+    "aztec": 1
+  }
+}

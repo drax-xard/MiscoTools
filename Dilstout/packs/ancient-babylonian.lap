@@ -1,0 +1,239 @@
+{
+  "format": "dilstout.lap",
+  "version": 1,
+  "meta": {
+    "id": "ancient-babylonian",
+    "name": "Ancient Babylonian",
+    "culture": "Akkadian (Old Babylonian)",
+    "era": "c. 2000-1600 BCE",
+    "author": "Dilstout",
+    "license": "CC0-1.0 (compilation); cited sources retain their own rights",
+    "sources": [
+      "Huehnergard, J. (2011). A Grammar of Akkadian, 3rd ed. Eisenbrauns.",
+      "Black, J., George, A., & Postgate, N. (2000). A Concise Dictionary of Akkadian. Harrassowitz.",
+      "Gelb, I. J. (1980). Computer-Aided Analysis of Amorite. University of Chicago Press.",
+      "The Assyrian Dictionary of the Oriental Institute of the University of Chicago (CAD)."
+    ],
+    "notes": "ASCII transliteration: sh = s, kh = h with a dot, ts = s with a dot, q = emphatic k; vowel length is not marked. Models naming patterns, not fluent Akkadian. Experimental; not reviewed by a specialist.",
+    "status": "experimental"
+  },
+  "phonology": {
+    "inventory": [
+      { "symbol": "p", "type": "consonant", "place": "bilabial", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "b", "type": "consonant", "place": "bilabial", "manner": "stop", "voicing": "voiced" },
+      { "symbol": "t", "type": "consonant", "place": "alveolar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "d", "type": "consonant", "place": "alveolar", "manner": "stop", "voicing": "voiced" },
+      { "symbol": "k", "type": "consonant", "place": "velar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "g", "type": "consonant", "place": "velar", "manner": "stop", "voicing": "voiced" },
+      { "symbol": "q", "type": "consonant", "place": "uvular", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "ts", "type": "consonant", "place": "alveolar", "manner": "affricate", "voicing": "voiceless" },
+      { "symbol": "s", "type": "consonant", "place": "alveolar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "ʃ", "type": "consonant", "place": "postalveolar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "x", "type": "consonant", "place": "velar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "h", "type": "consonant", "place": "glottal", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "m", "type": "consonant", "place": "bilabial", "manner": "nasal", "voicing": "voiced" },
+      { "symbol": "n", "type": "consonant", "place": "alveolar", "manner": "nasal", "voicing": "voiced" },
+      { "symbol": "l", "type": "consonant", "place": "alveolar", "manner": "lateral", "voicing": "voiced" },
+      { "symbol": "r", "type": "consonant", "place": "alveolar", "manner": "trill", "voicing": "voiced" },
+      { "symbol": "w", "type": "consonant", "place": "labiovelar", "manner": "approximant", "voicing": "voiced" },
+      { "symbol": "j", "type": "consonant", "place": "palatal", "manner": "approximant", "voicing": "voiced" },
+      { "symbol": "z", "type": "consonant", "place": "alveolar", "manner": "fricative", "voicing": "voiced" },
+      { "symbol": "a", "type": "vowel", "height": "open", "backness": "central", "rounded": false, "length": "short" },
+      { "symbol": "e", "type": "vowel", "height": "mid", "backness": "front", "rounded": false, "length": "short" },
+      { "symbol": "i", "type": "vowel", "height": "close", "backness": "front", "rounded": false, "length": "short" },
+      { "symbol": "u", "type": "vowel", "height": "close", "backness": "back", "rounded": true, "length": "short" }
+    ],
+    "romanization": {
+      "a": "a",
+      "b": "b",
+      "d": "d",
+      "e": "e",
+      "g": "g",
+      "h": "h",
+      "i": "i",
+      "k": "k",
+      "kh": "x",
+      "l": "l",
+      "m": "m",
+      "n": "n",
+      "p": "p",
+      "q": "q",
+      "r": "r",
+      "s": "s",
+      "sh": "ʃ",
+      "t": "t",
+      "ts": "ts",
+      "u": "u",
+      "w": "w",
+      "y": "j",
+      "z": "z"
+    },
+    "phonotactics": {
+      "onsets": ["p", "b", "t", "d", "k", "g", "q", "m", "n", "l", "r", "s", "ʃ", "x", "h", "w", "j", "z", "ts"],
+      "nuclei": ["a", "e", "i", "u"],
+      "codas": ["m", "n", "l", "r", "s", "ʃ", "x", "k", "b", "d"],
+      "notes": "Roots are compatible with common Akkadian syllable shapes; v1 does not enforce a full syllabifier."
+    },
+    "prosody": {
+      "stress": "penultimate",
+      "syllableTemplate": "(C)V(C)",
+      "tempo": 1,
+      "vowelLengthDistinctive": true,
+      "tone": null
+    },
+    "joinRules": [
+      { "type": "dropDuplicate" },
+      { "type": "elideVowel", "from": "a", "to": "", "when": "beforeVowel" },
+      { "type": "assimilate", "from": "n", "to": "m", "before": ["b", "p", "m"] }
+    ]
+  },
+  "lexicon": {
+    "roots": {
+      "bab": ["gate"],
+      "bit": ["house"],
+      "kish": ["city"],
+      "ur": ["city"],
+      "kur": ["mountain"],
+      "id": ["river"],
+      "shen": ["garden"],
+      "kir": ["orchard"],
+      "ekur": ["temple"],
+      "nun": ["prince"],
+      "sag": ["good"],
+      "til": ["mound"],
+      "shamash": ["sun", "Shamash"],
+      "sin": ["moon", "Sin"],
+      "marduk": ["Marduk"],
+      "ishtar": ["Ishtar"],
+      "bel": ["lord", "Bel"],
+      "nabu": ["Nabu"],
+      "ea": ["Ea"],
+      "enlil": ["Enlil"],
+      "adad": ["Adad"],
+      "anu": ["heaven", "Anu"],
+      "nergal": ["Nergal"],
+      "nanna": ["moon", "Nanna"],
+      "utu": ["sun", "Utu"],
+      "aya": ["dawn", "Aya"],
+      "dagan": ["Dagan"],
+      "nur": ["light"],
+      "shar": ["king"],
+      "ilu": ["god"],
+      "awil": ["man"],
+      "aplu": ["heir"],
+      "dam": ["blood"],
+      "kal": ["all"]
+    },
+    "prefixes": ["Warad", "Amat", "Ibbi", "Puzur"],
+    "suffixes": ["iddin", "muballit", "ussur", "nasir", "ibni", "aplu", "rabi", "nadin", "shuma", "kin", "beli"],
+    "epithets": ["Rabum", "Dannum", "Emqum"],
+    "honorifics": ["Sharru", "Rubum", "Sangum", "Naditum", "Ashipum", "Shakkanakkum"],
+    "numerals": ["ishten", "shena", "shalash"],
+    "articles": []
+  },
+  "person": {
+    "given": {
+      "male": [
+        "Hammurabi",
+        "Samsu-iluna",
+        "Abi-eshuh",
+        "Ammi-ditana",
+        "Ammi-saduqa",
+        "Samsu-ditana",
+        "Sin-iddinam",
+        "Warad-Sin",
+        "Rim-Sin",
+        "Ishbi-Erra",
+        "Lipit-Ishtar",
+        "Naram-Sin",
+        "Sharru-kin",
+        "Ibbi-Sin",
+        "Shu-ilishu",
+        "Ilushu-ibni",
+        "Puzur-Ishtar",
+        "Apil-kin",
+        "Sumu-abum",
+        "Sumu-la-el",
+        "Sabium",
+        "Sin-muballit"
+      ],
+      "female": [
+        "Beltani",
+        "Shibtu",
+        "Iltani",
+        "Tabni-Ishtar",
+        "Amat-Shamash",
+        "Ku-Aya",
+        "Nin-dada",
+        "Ummi-waqrat",
+        "Ahatani",
+        "Sirtum"
+      ],
+      "neutral": ["Silli-Shamash", "Ili-iddinam", "Nur-Ishtar"]
+    },
+    "templates": [
+      "{given}",
+      "{honorific} {given}",
+      "{given} {epithet}",
+      "{given} {clan}",
+      "{prefix}-{root}",
+      "{root}-{suffix}",
+      "{given} {family}"
+    ],
+    "surnamePatterns": ["{prefix}{root}", "{root}{suffix}"],
+    "order": "given-clan",
+    "clan": ["Amnanum", "Yahrurum", "Suteum", "Amurrum"],
+    "patronymic": null,
+    "gendered": true
+  },
+  "place": {
+    "templates": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{directional}-{root}",
+      "{settlementType} {root}"
+    ],
+    "settlementTypes": ["Alum", "Kaprum", "Durum", "Bitum", "Karum", "Temennum"],
+    "settlementSuffixes": ["um", "u", "a", "i", "ak"],
+    "terrainMorphemes": ["id", "kur", "shen", "kir", "nun", "til"],
+    "directionalAffixes": ["Ereb", "Shit", "Elum", "Shapal"]
+  },
+  "organization": {
+    "religious": ["Bit {root}", "{root} Bitum", "Ekur {root}"],
+    "political": ["Ekallum {root}", "{root} Ekallum", "Sharrum {root}"],
+    "military": ["Sabum {root}", "{root} Sabum", "Durum {root}"],
+    "guild": ["Karum {root}", "{root} Karum", "Tamkarum {root}"]
+  },
+  "domain": {
+    "nation": ["Matum {root}", "{root} Matum", "Matum Rabum {root}"],
+    "kingdom": ["Sharrum {root}", "{root} Sharrum", "Sharrum Rabum {root}"],
+    "empire": ["Sharrum Rabum {root}", "{root} Sharrum Rabum", "Sharrum {root} Rabum"],
+    "province": ["Pahatum {root}", "{root} Pahatum", "Pahatum Rabum {root}"],
+    "district": ["{directional} Halsum", "Halsum {root}", "{root} Halsum", "{directional}-{root} Halsum"],
+    "town": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{settlementType} {root}",
+      "{directional}-{root}"
+    ]
+  },
+  "weights": {
+    "componentWeights": {
+      "root": 1,
+      "given": 1,
+      "prefix": 1,
+      "suffix": 1
+    },
+    "categoryBias": {
+      "person": 1,
+      "place": 1,
+      "organization": 1,
+      "domain": 1
+    }
+  },
+  "voice": {
+    "preferredSpeaker": "formant",
+    "basePitch": 110,
+    "rate": 1
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "format": "dilstout.lap",
+  "version": 1,
+  "meta": {
+    "id": "aztec",
+    "name": "Aztec (Nahuatl)",
+    "culture": "Nahua / Mexica",
+    "era": "c. 1300-1521 CE",
+    "author": "Dilstout",
+    "license": "CC0-1.0 (compilation); cited sources retain their own rights",
+    "sources": [
+      "Karttunen, F. (1983). An Analytical Dictionary of Nahuatl. University of Texas Press.",
+      "Andrews, J. R. (1975). Introduction to Classical Nahuatl. University of Texas Press.",
+      "Lockhart, J. (1992). The Nahuas After the Conquest. Stanford University Press.",
+      "Sahagun, B. de (1950-1982). Florentine Codex: General History of the Things of New Spain, trans. Dibble & Anderson. School of American Research."
+    ],
+    "notes": "ASCII transliteration: x = sh, ch = ch, tl = lateral affricate, tz = ts, cu/qu = kw, hu = w, h = saltillo. Long vowels are not marked. Models naming patterns, not fluent Nahuatl. Experimental; not reviewed by a specialist.",
+    "status": "experimental"
+  },
+  "phonology": {
+    "inventory": [
+      { "symbol": "p", "type": "consonant", "place": "bilabial", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "t", "type": "consonant", "place": "alveolar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "k", "type": "consonant", "place": "velar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "kʷ", "type": "consonant", "place": "labiovelar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "ʔ", "type": "consonant", "place": "glottal", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "ts", "type": "consonant", "place": "alveolar", "manner": "affricate", "voicing": "voiceless" },
+      { "symbol": "tʃ", "type": "consonant", "place": "postalveolar", "manner": "affricate", "voicing": "voiceless" },
+      { "symbol": "tɬ", "type": "consonant", "place": "alveolar", "manner": "lateral affricate", "voicing": "voiceless" },
+      { "symbol": "s", "type": "consonant", "place": "alveolar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "ʃ", "type": "consonant", "place": "postalveolar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "m", "type": "consonant", "place": "bilabial", "manner": "nasal", "voicing": "voiced" },
+      { "symbol": "n", "type": "consonant", "place": "alveolar", "manner": "nasal", "voicing": "voiced" },
+      { "symbol": "l", "type": "consonant", "place": "alveolar", "manner": "lateral", "voicing": "voiced" },
+      { "symbol": "w", "type": "consonant", "place": "labiovelar", "manner": "approximant", "voicing": "voiced" },
+      { "symbol": "j", "type": "consonant", "place": "palatal", "manner": "approximant", "voicing": "voiced" },
+      { "symbol": "a", "type": "vowel", "height": "open", "backness": "central", "rounded": false, "length": "short" },
+      { "symbol": "e", "type": "vowel", "height": "mid", "backness": "front", "rounded": false, "length": "short" },
+      { "symbol": "i", "type": "vowel", "height": "close", "backness": "front", "rounded": false, "length": "short" },
+      { "symbol": "o", "type": "vowel", "height": "mid", "backness": "back", "rounded": true, "length": "short" }
+    ],
+    "romanization": {
+      "a": "a",
+      "c": "k",
+      "ch": "tʃ",
+      "cu": "kʷ",
+      "e": "e",
+      "h": "ʔ",
+      "hu": "w",
+      "i": "i",
+      "k": "k",
+      "l": "l",
+      "m": "m",
+      "n": "n",
+      "o": "o",
+      "p": "p",
+      "q": "k",
+      "qu": "k",
+      "s": "s",
+      "t": "t",
+      "tl": "tɬ",
+      "tz": "ts",
+      "u": "w",
+      "x": "ʃ",
+      "y": "j",
+      "z": "s"
+    },
+    "phonotactics": {
+      "onsets": ["p", "t", "k", "kʷ", "ʔ", "ts", "tʃ", "tɬ", "s", "ʃ", "m", "n", "l", "w", "j"],
+      "nuclei": ["a", "e", "i", "o"],
+      "codas": ["ʔ", "l", "m", "n", "s", "ʃ"],
+      "notes": "Classical Nahuatl allows complex onsets and tl/tz; v1 does not enforce a full syllabifier."
+    },
+    "prosody": {
+      "stress": "penultimate",
+      "syllableTemplate": "CV(C)",
+      "tempo": 1,
+      "vowelLengthDistinctive": true,
+      "tone": null
+    },
+    "joinRules": [
+      { "type": "dropDuplicate" },
+      { "type": "elideVowel", "from": "i", "to": "", "when": "beforeVowel" },
+      { "type": "elideVowel", "from": "a", "to": "", "when": "beforeVowel" },
+      { "type": "assimilate", "from": "n", "to": "m", "before": ["p", "m"] }
+    ]
+  },
+  "lexicon": {
+    "roots": {
+      "atl": ["water"],
+      "calli": ["house"],
+      "tetl": ["stone"],
+      "tepetl": ["mountain"],
+      "xochitl": ["flower"],
+      "cuauhtli": ["eagle"],
+      "ocelotl": ["jaguar"],
+      "miztli": ["puma"],
+      "coatl": ["serpent"],
+      "tochtli": ["rabbit"],
+      "mazatl": ["deer"],
+      "citlalin": ["star"],
+      "metztli": ["moon"],
+      "tonatiuh": ["sun"],
+      "ehecatl": ["wind"],
+      "teotl": ["god"],
+      "quetzalli": ["feather"],
+      "chalchihuitl": ["jade"],
+      "tlalli": ["land"],
+      "altepetl": ["city-state"],
+      "calpulli": ["ward"],
+      "milli": ["field"],
+      "chinamitl": ["reed"],
+      "acatl": ["reed"],
+      "ollin": ["movement"],
+      "miquiztli": ["death"],
+      "nemiliztli": ["life"],
+      "yollotl": ["heart"],
+      "ixtli": ["face"],
+      "camatl": ["mouth"],
+      "matl": ["hand"],
+      "ohtli": ["road"],
+      "atoyatl": ["river"],
+      "huey": ["great"],
+      "pilli": ["noble"],
+      "cuicatl": ["song"],
+      "tlahtolli": ["word"]
+    },
+    "prefixes": ["cuauh", "ocel", "coa", "xoch", "teo", "chalchiuh", "itz", "quetzal"],
+    "suffixes": ["tzin", "pilli", "yotl", "tlan", "pan", "co"],
+    "epithets": ["Huey", "Cualli", "Yectli"],
+    "honorifics": ["Tlatoani", "Cihuacoatl", "Teuctli", "Pilli", "Tlamacazqui"],
+    "numerals": ["ce", "ome", "yei"],
+    "articles": []
+  },
+  "person": {
+    "given": {
+      "male": [
+        "Cuauhtemoc",
+        "Itzcoatl",
+        "Motecuhzoma",
+        "Nezahualcoyotl",
+        "Cuitlahuac",
+        "Axayacatl",
+        "Tizoc",
+        "Ahuizotl",
+        "Chimalpopoca",
+        "Huitzilihuitl",
+        "Acamapichtli",
+        "Xicotencatl",
+        "Cuauhtli",
+        "Ocelotl",
+        "Tochtli",
+        "Mazatl",
+        "Coatl",
+        "Yaotl"
+      ],
+      "female": [
+        "Xochitl",
+        "Citlali",
+        "Tlapalizquixochitl",
+        "Malinali",
+        "Tecuichpo",
+        "Atotoztli",
+        "Chimalma",
+        "Xiuhtlaltzin",
+        "Papantzin",
+        "Miahuaxihuitl"
+      ],
+      "neutral": ["Nelli", "Yolotl", "Cuicatl"]
+    },
+    "templates": [
+      "{given}",
+      "{honorific} {given}",
+      "{given} {epithet}",
+      "{given} {clan}",
+      "{prefix}{root}",
+      "{root}{suffix}",
+      "{given} {family}"
+    ],
+    "surnamePatterns": ["{prefix}{root}", "{root}{suffix}"],
+    "order": "given-family",
+    "clan": ["Atempan", "Teopan", "Moyotla", "Coatlan", "Tecpan", "Ixhuatepec"],
+    "patronymic": null,
+    "gendered": true
+  },
+  "place": {
+    "templates": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{directional}-{root}",
+      "{settlementType} {root}"
+    ],
+    "settlementTypes": ["Altepetl", "Calpulli", "Chinamitl", "Calli", "Teocalli"],
+    "settlementSuffixes": ["tlan", "pan", "co", "tepec", "huacan", "can"],
+    "terrainMorphemes": ["atoy", "tepe", "tlal", "chinam", "mil", "xal"],
+    "directionalAffixes": ["Huitz", "Mictlan", "Tlahuiz", "Cihuatlan"]
+  },
+  "organization": {
+    "religious": ["Teocalli {root}", "{root} Teocalli", "Tlamacazque {root}"],
+    "political": ["Calpulli {root}", "{root} Calpulli", "Huey Calpulli {root}"],
+    "military": ["Yaotl {root}", "{root} Yaotl", "Ocelo {root}"],
+    "guild": ["Tolteca {root}", "{root} Tolteca", "Cuicatl {root}"]
+  },
+  "domain": {
+    "nation": ["Altepetl {root}", "{root} Altepetl", "Huey Altepetl {root}"],
+    "kingdom": ["Tlatoani {root}", "{root} Tlatoani", "Huey Tlatoani {root}"],
+    "empire": ["Huey Tlatoani {root}", "{root} Huey Tlatoani", "Huey {root} Altepetl"],
+    "province": ["Huey Calpulli {root}", "{root} Huey Calpulli", "Huey {root} Calpulli"],
+    "district": ["{directional} Calpulli", "Calpulli {root}", "{root} Calpulli"],
+    "town": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{settlementType} {root}",
+      "{directional}-{root}"
+    ]
+  },
+  "weights": {
+    "componentWeights": {
+      "root": 1,
+      "given": 1,
+      "prefix": 1,
+      "suffix": 1
+    },
+    "categoryBias": {
+      "person": 1,
+      "place": 1,
+      "organization": 1,
+      "domain": 1
+    }
+  },
+  "voice": {
+    "preferredSpeaker": "formant",
+    "basePitch": 120,
+    "rate": 1
+  }
+}
