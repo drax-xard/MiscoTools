@@ -8,6 +8,9 @@ tools: no build step, no runtime dependencies, no telemetry, and everything loca
 
 > Status: Milestone 1 complete — schemas, seeded engine, `.lpp` presets, weighted mixing,
 > provenance, and 49 passing tests. The UI and starter packs are next.
+>
+> Future: a native embeddable SDK (C ABI + C++ wrapper, later Python/WASM) is planned as M8,
+> after all current milestones. See [the roadmap](docs/ROADMAP.md).
 
 ## Why
 
