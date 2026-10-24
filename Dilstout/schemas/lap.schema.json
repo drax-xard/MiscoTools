@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://miscotools.local/dilstout/lap.schema.json",
+  "title": "Dilstout Language Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "meta",
+    "phonology",
+    "lexicon",
+    "person",
+    "place",
+    "organization",
+    "domain"
+  ],
+  "properties": {
+    "format": { "const": "dilstout.lap" },
+    "version": { "type": "integer", "minimum": 1 },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "culture": { "type": "string" },
+        "era": { "type": "string" },
+        "author": { "type": "string" },
+        "license": { "type": "string" },
+        "sources": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["experimental", "draft", "stable"] }
+      }
+    },
+    "phonology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inventory", "romanization", "prosody"],
+      "properties": {
+        "inventory": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/phoneme" }
+        },
+        "romanization": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "phonotactics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "onsets": { "type": "array", "items": { "type": "string" } },
+            "nuclei": { "type": "array", "items": { "type": "string" } },
+            "codas": { "type": "array", "items": { "type": "string" } },
+            "notes": { "type": "string" }
+          }
+        },
+        "prosody": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stress", "syllableTemplate", "tempo"],
+          "properties": {
+            "stress": { "type": ["string", "null"] },
+            "syllableTemplate": { "type": "string" },
+            "tempo": { "type": "number", "minimum": 0.1, "maximum": 4 },
+            "vowelLengthDistinctive": { "type": "boolean" },
+            "tone": { "type": ["string", "null"] }
+          }
+        },
+        "joinRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/joinRule" }
+        }
+      }
+    },
+    "lexicon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roots", "prefixes", "suffixes", "epithets", "honorifics"],
+      "properties": {
+        "roots": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" }
+          }
+        },
+        "prefixes": { "type": "array", "items": { "type": "string" } },
+        "suffixes": { "type": "array", "items": { "type": "string" } },
+        "epithets": { "type": "array", "items": { "type": "string" } },
+        "honorifics": { "type": "array", "items": { "type": "string" } },
+        "numerals": { "type": "array", "items": { "type": "string" } },
+        "articles": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["given", "templates"],
+      "properties": {
+        "given": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "male": { "type": "array", "items": { "type": "string" } },
+            "female": { "type": "array", "items": { "type": "string" } },
+            "neutral": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "templates": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/template" } },
+        "surnamePatterns": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "order": {
+          "type": "string",
+          "enum": ["given-family", "family-given", "given-only", "given-clan"]
+        },
+        "clan": { "type": "array", "items": { "type": "string" } },
+        "patronymic": { "type": ["string", "null"] },
+        "gendered": { "type": "boolean" }
+      }
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["templates"],
+      "properties": {
+        "templates": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/template" } },
+        "settlementTypes": { "type": "array", "items": { "type": "string" } },
+        "settlementSuffixes": { "type": "array", "items": { "type": "string" } },
+        "terrainMorphemes": { "type": "array", "items": { "type": "string" } },
+        "directionalAffixes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "religious": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "political": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "military": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "guild": { "type": "array", "items": { "$ref": "#/$defs/template" } }
+      }
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nation": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "kingdom": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "empire": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "province": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "district": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+        "town": { "type": "array", "items": { "$ref": "#/$defs/template" } }
+      }
+    },
+    "weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "componentWeights": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "categoryBias": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "voice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preferredSpeaker": { "type": "string" },
+        "basePitch": { "type": "number", "minimum": 40, "maximum": 400 },
+        "rate": { "type": "number", "minimum": 0.1, "maximum": 4 }
+      }
+    }
+  },
+  "$defs": {
+    "template": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "phoneme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "type"],
+      "properties": {
+        "symbol": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "enum": ["consonant", "vowel"] },
+        "place": { "type": "string" },
+        "manner": { "type": "string" },
+        "voicing": { "type": "string", "enum": ["voiced", "voiceless"] },
+        "height": { "type": "string" },
+        "backness": { "type": "string" },
+        "rounded": { "type": "boolean" },
+        "length": { "type": "string", "enum": ["short", "long", "half-long"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "joinRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["elideVowel", "dropDuplicate", "assimilate", "replace", "insert"]
+        },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "when": {
+          "type": "string",
+          "enum": ["beforeVowel", "beforeConsonant", "afterVowel", "afterConsonant", "always"]
+        },
+        "before": { "type": "array", "items": { "type": "string" } },
+        "vowels": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

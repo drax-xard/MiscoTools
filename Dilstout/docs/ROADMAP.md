@@ -16,9 +16,10 @@ Status legend: `planned` · `in progress` · `done`
 
 ## M1 — Scaffold and core engine
 
-**Status:** planned
+**Status:** done
 
-No UI. No build step. No dependencies. Runnable with `node --test`.
+No UI. No build step. No dependencies. Runnable with `node --test` (Node 22.14+ for JSON
+module imports). Verified with 49 passing tests.
 
 ### Deliverables
 
@@ -35,7 +36,7 @@ No UI. No build step. No dependencies. Runnable with `node --test`.
 | `core/mix-strategies/weighted-lottery.js` | v1 strategy. |
 | `core/mix-strategies/crossover.js` | Documented stub fixing the contract. |
 | `core/mix-strategies/strand-blend.js` | Documented stub fixing the contract. |
-| `core/morphology.js` | Data-driven join rules: elision, harmony, assimilation, spacing/hyphen/case. |
+| `core/morphology.js` | Data-driven join rules: elision, assimilation, duplication, replacement, insertion, plus spacing/hyphen/case handling. |
 | `core/validate.js` | Phonotactic checks, retry/relax loop, warnings. |
 | `core/engine.js` | Generation pipeline and result contract. |
 | `core/renderers/plain.js` | ASCII-safe romanized renderer. |
@@ -58,15 +59,15 @@ generate({ laps, preset, category, count, seed })
 
 ### Acceptance criteria
 
-- [ ] `.lpp` save/load is lossless: weights, overrides, seed, strategy, renderer, and pins.
-- [ ] Same `.lpp` + seed + pack versions produce byte-identical output.
-- [ ] No `Math.random()` in `core/`; all draws use the injected RNG.
-- [ ] 1,000 generated names contain no `{slot}`, `null`, or `undefined`.
-- [ ] Batch count and dedupe respected.
-- [ ] Lottery distribution within ±2% of configured weights over 10,000 draws.
-- [ ] Every output phoneme and every rendered character is traceable to a source pack/slot.
-- [ ] Phoneme, prosody, and `voice` fields validate and survive a `.lpp` round-trip.
-- [ ] `node --test` passes with zero dependencies.
+- [x] `.lpp` save/load is lossless: weights, overrides, seed, strategy, renderer, and pins.
+- [x] Same `.lpp` + seed + pack versions produce byte-identical output.
+- [x] No `Math.random()` in `core/`; all draws use the injected RNG.
+- [x] 1,000 generated names contain no `{slot}`, `null`, or `undefined`.
+- [x] Batch count and dedupe respected.
+- [x] Lottery distribution within ±2% of configured weights over 10,000 draws.
+- [x] Every output phoneme and every rendered character is traceable to a source pack/slot.
+- [x] Phoneme, prosody, and `voice` fields validate and survive a `.lpp` round-trip.
+- [x] `node --test` passes with zero dependencies.
 
 ## M2 — Starter language packs
 

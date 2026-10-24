@@ -12,6 +12,10 @@ A lightweight, dependency-free everyday AI assistant. Connects directly to any O
 
 Always-on, modular assistant runtime for a Raspberry Pi or similar device. Uses a remote OpenAI-compatible LLM, local voice interaction, plugins, reminders, home automation, and a project workspace. The FastAPI backend, streamed chat MVP, SQLite storage, and web client are in place. See the [development plan](B-BOT-Advanced/PLAN.md).
 
+### [Dilstout](Dilstout/README.md)
+
+A portable, offline random name generator that mixes real language packs to create person, place, organization, and domain names. Packs define phonology, morphology, and naming conventions; the mixer blends them with per-category weights and saves mixes as `.lpp` presets. No build step or dependencies.
+
 ### [GitView](GitView/README.md)
 
 A dependency-free CLI that turns any local Git repository into a single self-contained HTML report. Includes commit history, activity charts, contributor and file-type breakdowns, a searchable file tree, instant commit search, and dark/light themes. Requires only Python 3.9+ and Git.

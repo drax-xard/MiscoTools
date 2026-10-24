@@ -185,14 +185,19 @@ core/
   lap.js              load, validate, normalize, migrate .lap
   preset.js           serialize / parse / hash .lpp
   mixer.js            active pack set, normalized weights, overrides
+  defaults.js         preset builder for the current pack set
+  slots.js            built-in slot resolvers and availability checks
+  categories.js       built-in person/place/organization/domain specs
+  schema.js           dependency-free JSON Schema subset validator
   mix-strategies/
     weighted-lottery.js
     crossover.js      documented stub, deferred
     strand-blend.js   documented stub, deferred
-  morphology.js       data-driven join and prosody rules
+  morphology.js       data-driven join rules
   validate.js         schema + phonotactic validation, retry/relax
   engine.js           the generation pipeline
   renderers/plain.js
+  phoneme-resolvers/romanization.js
   speakers/           interface only in v1; synthesis later
 ui/
   app.js mixer.js gallery.js studio.js results.js
@@ -225,7 +230,7 @@ registry.validators.register("phonotactics", fn);
 
 | Point | Signature | v1 |
 |---|---|---|
-| Mix strategy | `selectSource({category, slot, laps, rng, state}) -> lapId` | `weighted-lottery`; stubs for crossover and strand blend |
+| Mix strategy | `selectSource({category, slot, laps, rng, state, weights}) -> lapId` | `weighted-lottery`; stubs for crossover and strand blend |
 | Renderer | `render({parts, lapId, style}) -> string` | `plain` |
 | Phoneme resolver | `resolvePhonemes({text, lapId, context}) -> [{symbol, features, lapId}]` | `romanization` |
 | Speaker | `speak({phonemes, prosody, voice}) -> Promise<void>` | Interface only |
@@ -314,7 +319,7 @@ Join rules are data, not code, so packs remain pure JSON:
 ```jsonc
 { "type": "elideVowel", "from": "a", "to": "", "when": "beforeVowel" }
 { "type": "assimilate", "from": "n", "to": "m", "when": "beforeLabial" }
-{ "type": "harmonize", "vowels": ["a", "e", "i"], "trigger": "backness" }
+{ "type": "insert", "to": "e", "when": "afterConsonant" }
 ```
 
 Rules run in declaration order at join boundaries, followed by template-level capitalization
@@ -373,7 +378,8 @@ v1 scope: **data plus JS hooks**.
 
 ## 9. Testing strategy
 
-Node's built-in test runner, zero dependencies:
+Node's built-in test runner, zero dependencies. Node 22.14+ is required for JSON module
+imports of the schemas.
 
 - RNG sequence reproducibility, seed-code round-trip.
 - Schema validation, including clear error paths for missing fields.

@@ -1,0 +1,19 @@
+{
+  "format": "dilstout.lpp",
+  "version": 1,
+  "name": "Synthetic demo",
+  "description": "Single-pack preset used by the core tests and as a .lpp example.",
+  "laps": [
+    {
+      "id": "test-synthetic",
+      "weight": 1,
+      "overrides": {}
+    }
+  ],
+  "seed": "dilstout-7f3a",
+  "strategy": "weighted-lottery",
+  "renderer": "plain",
+  "pins": {
+    "test-synthetic": 1
+  }
+}

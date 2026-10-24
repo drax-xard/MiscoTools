@@ -1,0 +1,171 @@
+{
+  "format": "dilstout.lap",
+  "version": 1,
+  "meta": {
+    "id": "test-synthetic",
+    "name": "Synthetic Test Pack",
+    "culture": "Invented",
+    "era": "none",
+    "author": "Dilstout",
+    "license": "Same as the repository",
+    "sources": ["Invented for engine tests"],
+    "notes": "Exercises every v1 slot, join rule, and phoneme field. Not a real culture.",
+    "status": "experimental"
+  },
+  "phonology": {
+    "inventory": [
+      { "symbol": "p", "type": "consonant", "place": "bilabial", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "b", "type": "consonant", "place": "bilabial", "manner": "stop", "voicing": "voiced" },
+      { "symbol": "t", "type": "consonant", "place": "alveolar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "d", "type": "consonant", "place": "alveolar", "manner": "stop", "voicing": "voiced" },
+      { "symbol": "k", "type": "consonant", "place": "velar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "g", "type": "consonant", "place": "velar", "manner": "stop", "voicing": "voiced" },
+      { "symbol": "f", "type": "consonant", "place": "labiodental", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "v", "type": "consonant", "place": "labiodental", "manner": "fricative", "voicing": "voiced" },
+      { "symbol": "s", "type": "consonant", "place": "alveolar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "z", "type": "consonant", "place": "alveolar", "manner": "fricative", "voicing": "voiced" },
+      { "symbol": "ʃ", "type": "consonant", "place": "postalveolar", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "tʃ", "type": "consonant", "place": "postalveolar", "manner": "affricate", "voicing": "voiceless" },
+      { "symbol": "h", "type": "consonant", "place": "glottal", "manner": "fricative", "voicing": "voiceless" },
+      { "symbol": "m", "type": "consonant", "place": "bilabial", "manner": "nasal", "voicing": "voiced" },
+      { "symbol": "n", "type": "consonant", "place": "alveolar", "manner": "nasal", "voicing": "voiced" },
+      { "symbol": "l", "type": "consonant", "place": "alveolar", "manner": "lateral", "voicing": "voiced" },
+      { "symbol": "r", "type": "consonant", "place": "alveolar", "manner": "trill", "voicing": "voiced" },
+      { "symbol": "j", "type": "consonant", "place": "palatal", "manner": "approximant", "voicing": "voiced" },
+      { "symbol": "w", "type": "consonant", "place": "labiovelar", "manner": "approximant", "voicing": "voiced" },
+      { "symbol": "c", "type": "consonant", "place": "velar", "manner": "stop", "voicing": "voiceless" },
+      { "symbol": "a", "type": "vowel", "height": "open", "backness": "central", "rounded": false, "length": "short" },
+      { "symbol": "e", "type": "vowel", "height": "mid", "backness": "front", "rounded": false, "length": "short" },
+      { "symbol": "i", "type": "vowel", "height": "close", "backness": "front", "rounded": false, "length": "short" },
+      { "symbol": "o", "type": "vowel", "height": "mid", "backness": "back", "rounded": true, "length": "short" },
+      { "symbol": "u", "type": "vowel", "height": "close", "backness": "back", "rounded": true, "length": "short" },
+      { "symbol": "y", "type": "vowel", "height": "close", "backness": "front", "rounded": false, "length": "short" }
+    ],
+    "romanization": {
+      "a": "a",
+      "b": "b",
+      "c": "k",
+      "d": "d",
+      "e": "e",
+      "f": "f",
+      "g": "g",
+      "h": "h",
+      "i": "i",
+      "j": "j",
+      "k": "k",
+      "l": "l",
+      "m": "m",
+      "n": "n",
+      "o": "o",
+      "p": "p",
+      "r": "r",
+      "s": "s",
+      "t": "t",
+      "u": "u",
+      "v": "v",
+      "w": "w",
+      "y": "y",
+      "z": "z",
+      "sh": "ʃ",
+      "ch": "tʃ"
+    },
+    "phonotactics": {
+      "onsets": ["p", "b", "t", "d", "k", "g", "f", "v", "s", "z", "ʃ", "tʃ", "h", "m", "n", "l", "r", "j", "w"],
+      "nuclei": ["a", "e", "i", "o", "u"],
+      "codas": ["n", "r", "l", "s", "m"],
+      "notes": "Synthetic; no strict constraints enforced in v1."
+    },
+    "prosody": {
+      "stress": "penultimate",
+      "syllableTemplate": "(C)V(C)",
+      "tempo": 1,
+      "vowelLengthDistinctive": false,
+      "tone": null
+    },
+    "joinRules": [
+      { "type": "dropDuplicate" },
+      { "type": "elideVowel", "from": "a", "to": "", "when": "beforeVowel" },
+      { "type": "assimilate", "from": "n", "to": "m", "before": ["b", "p", "m"] }
+    ]
+  },
+  "lexicon": {
+    "roots": {
+      "bara": ["hill"],
+      "duna": ["river"],
+      "kor": ["stone"],
+      "sela": ["moon"],
+      "vira": ["life"],
+      "tama": ["dawn"],
+      "nira": ["star"],
+      "halu": ["wind"]
+    },
+    "prefixes": ["ka", "te", "su"],
+    "suffixes": ["an", "or", "is", "el"],
+    "epithets": ["the Bold", "the Wise", "the Fair"],
+    "honorifics": ["Lord", "Lady", "Elder"],
+    "numerals": ["one", "two", "three"],
+    "articles": ["the", "a"]
+  },
+  "person": {
+    "given": {
+      "male": ["daro", "fen", "karo", "nero", "ilo", "tamo"],
+      "female": ["ava", "gala", "hira", "lumi", "mira", "sela"],
+      "neutral": ["ari", "juno", "vika"]
+    },
+    "templates": [
+      "{given} {family}",
+      "{honorific} {given}",
+      "{given} of {clan}",
+      "{prefix}{root}{suffix}"
+    ],
+    "surnamePatterns": ["{root}{suffix}", "{root}{suffix}an", "{prefix}{root}"],
+    "order": "given-family",
+    "clan": ["Vela", "Toran", "Sibu", "Marek"],
+    "patronymic": null,
+    "gendered": true
+  },
+  "place": {
+    "templates": [
+      "{root}{settlementSuffix}",
+      "{terrain}{settlementSuffix}",
+      "{directional}-{root}",
+      "{settlementType} of {root}"
+    ],
+    "settlementTypes": ["village", "town", "fort", "harbor"],
+    "settlementSuffixes": ["ton", "burg", "field", "mar", "vale"],
+    "terrainMorphemes": ["riv", "hul", "val", "mor", "dun"],
+    "directionalAffixes": ["nor", "sul", "est", "wes"]
+  },
+  "organization": {
+    "religious": ["Order of the {root}", "Temple of {root}{suffix}"],
+    "political": ["Council of {terrain}{settlementSuffix}", "League of {root}"],
+    "military": ["{terrain} Guard", "Host of {root}"],
+    "guild": ["{root} Guild", "{root}{suffix} Guild"]
+  },
+  "domain": {
+    "nation": ["Kingdom of {root}{settlementSuffix}"],
+    "kingdom": ["{root}{settlementSuffix} Kingdom"],
+    "empire": ["{root}{root} Empire"],
+    "province": ["Province of {terrain}"],
+    "district": ["{directional} District"],
+    "town": ["{root}{settlementSuffix}", "{terrain}{settlementSuffix}"]
+  },
+  "weights": {
+    "componentWeights": {
+      "root": 1,
+      "suffix": 1,
+      "given": 1
+    },
+    "categoryBias": {
+      "person": 1,
+      "place": 1,
+      "organization": 1,
+      "domain": 1
+    }
+  },
+  "voice": {
+    "preferredSpeaker": "formant",
+    "basePitch": 120,
+    "rate": 1
+  }
+}

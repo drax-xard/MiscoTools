@@ -11,6 +11,17 @@ Versions are project-wide: a release covers every tool in the collection.
 
 ### Added
 
+- **Dilstout** — portable random name generator with mixable language packs.
+  - Design document, roadmap, authoring guide, and plugin API.
+  - Versioned `.lap` language-pack and `.lpp` preset schemas with a dependency-free
+    schema validator.
+  - Seeded generation engine with weighted per-slot mixing, per-category overrides,
+    morphophonemic join rules, phonotactic validation, deduplication, and per-name
+    provenance and phoneme output.
+  - Pluggable registries for mix strategies, renderers, speakers, prosody, slot and
+    phoneme resolvers, categories, importers, and validators, with deferred strategy
+    stubs for template crossover and strand blending.
+  - Synthetic test pack and bundled `.lpp` example; 49 core tests.
 - **LlamaTune** — PrismML ternary quantization options (`PTQ1_0` and `PQ2_0`) in the
   picker, weight estimates, GGUF auto-detection (tensor types 142/143 and file types
   141/143), generated model filenames, and a PrismML runtime warning.
